@@ -10,6 +10,6 @@
 
 @interface PlayerView : UIView
 
-+ (PlayerView *)playerView;
++ (PlayerView *)playerViewWithUrl:(NSString *)url;
 
 @end

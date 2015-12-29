@@ -10,10 +10,6 @@
 #import "PlayerView.h"
 #import "PlayerCustomSlider.h"
 
-static NSString * const kTestUrl = @"http://v.jxvdy.com/sendfile/w5bgP3A8JgiQQo5l0hvoNGE2H16WbN09X-ONHPq3P3C1BISgf7C-qVs6_c8oaw3zKScO78I--b0BGFBRxlpw13sf2e54QA";
-
-static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU05040100vlD00k01.mp4?KID=unistore,video&Expires=1451374368&ssig=yrVbabKvgo";
-
 typedef NS_ENUM(NSInteger, PlayerState)
 {
     PlayerIsStop = 0,  //视频已经停止
@@ -39,7 +35,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 @property (strong, nonatomic) AVPlayer *avPlayer;
 
-
 @property (weak, nonatomic) IBOutlet UIView *controlBar;
 @property (weak, nonatomic) IBOutlet UILabel *currentTimeLab;
 @property (weak, nonatomic) IBOutlet UILabel *durationLab;
@@ -58,11 +53,36 @@ typedef NS_ENUM(NSInteger, PlayerState)
     return [AVPlayerLayer class];
 }
 
--(void)dealloc
+- (void)dealloc
 {
-    [_avPlayer removeObserver:self forKeyPath:@"currentItem.status"];
+    //通知
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     
-    [[NSNotificationCenter defaultCenter] removeObserver:self forKeyPath:AVPlayerItemDidPlayToEndTimeNotification];
+    //播放器
+    [_avPlayer removeObserver:self forKeyPath:@"currentItem.status"];
+    _avPlayer = nil;
+    
+    NSLog(@"播放器释放... ");
+}
+
+- (void)removeFromSuperview
+{
+    [super removeFromSuperview];
+ 
+    if (_avPlayer && _avPlayer.currentItem)
+    {
+        //释放内存
+        [_avPlayer.currentItem cancelPendingSeeks];
+        [_avPlayer.currentItem.asset cancelLoading];
+        [_avPlayer replaceCurrentItemWithPlayerItem:nil];
+    }
+    
+    //定时器
+    if (_moniorTimer)
+    {
+        [_moniorTimer invalidate];
+        _moniorTimer = nil;
+    }
 }
 
 - (void)initAVPlayerWithUrl:(NSString *)url
@@ -70,9 +90,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
     NSURL *videoUrl = [NSURL URLWithString:url];
     _avPlayer = [[AVPlayer alloc] initWithURL:videoUrl];
     
-    AVPlayerLayer *layer = (AVPlayerLayer *)self.layer;
-    layer.videoGravity = AVLayerVideoGravityResizeAspectFill; //视频填充模式
-    layer.player= _avPlayer;
+    AVPlayerLayer *playLayer = (AVPlayerLayer *)self.layer;
+    playLayer.videoGravity = AVLayerVideoGravityResizeAspectFill; //视频填充模式
+    playLayer.player= _avPlayer;
 
     //添加status监听
     [self.avPlayer addObserver:self forKeyPath:@"currentItem.status" options:NSKeyValueObservingOptionNew context:nil];
@@ -87,7 +107,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
     _controlBar.alpha = 1;
     
     [self swithPlayerState:PlayerIsStop];
-
+    
+ 
     //进度条
     self.playerSlider.process = 0.0;
     self.playerSlider.bufferProcess = 0.0;
@@ -100,7 +121,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     //菊花
     self.indicatorView.hidden = YES;
     self.indicatorView.hidesWhenStopped = YES;
-    
+
     //手势
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction)];
     [self addGestureRecognizer:tap];
@@ -203,15 +224,15 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 
 #pragma mark -- Public API
-+ (PlayerView *)playerView
++ (PlayerView *)playerViewWithUrl:(NSString *)url
 {
     PlayerView *player = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([PlayerView class]) owner:nil options:nil] firstObject];
     
     player.autoresizingMask = UIViewAutoresizingNone;
     
-    [player initAVPlayerWithUrl:kTestUrl];
-
     [player initUI];
+    
+    [player initAVPlayerWithUrl:url];
     
     return player;
 }

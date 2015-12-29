@@ -17,7 +17,7 @@
 
 @property (nonatomic, assign) CGFloat bufferProcess;
 
-@property (nonatomic, strong) id<PlayerCustomSliderProtocol>delegate;
+@property (nonatomic, weak) id<PlayerCustomSliderProtocol>delegate;
 
 @end
 
