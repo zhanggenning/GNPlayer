@@ -8,7 +8,6 @@
 
 #import "MainViewController.h"
 #import "PlayerView.h"
-#import "PlayerSlider.h"
 #import "PlayerCustomSlider.h"
 
 @interface MainViewController ()

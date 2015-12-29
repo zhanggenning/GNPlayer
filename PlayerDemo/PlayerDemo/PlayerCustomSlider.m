@@ -92,6 +92,7 @@ static const CGFloat kSliderThumbHeight = 20; //正方形滑块边长
                                      self.bounds.size.height / 2);
 }
 
+
 #pragma mark -- Private API
 - (CGRect)dstRectWithSrcRect:(CGRect)rect withProcess:(CGFloat)process
 {

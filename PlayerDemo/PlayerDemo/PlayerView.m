@@ -40,8 +40,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
 @property (weak, nonatomic) IBOutlet UIView *controlBar;
 @property (weak, nonatomic) IBOutlet UILabel *currentTimeLab;
 @property (weak, nonatomic) IBOutlet UILabel *durationLab;
-@property (weak, nonatomic) IBOutlet PlayerCustomSlider *playerSlider;
 @property (weak, nonatomic) IBOutlet UIButton *playBtn;
+@property (weak, nonatomic) IBOutlet PlayerCustomSlider *playerSlider;
 
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *constraint_controlBarHeight;
 
@@ -63,12 +63,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
     [self.playerView removeTimeObserver:_playerTimeObserver];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self forKeyPath:AVPlayerItemDidPlayToEndTimeNotification];
-}
-
-- (void)awakeFromNib
-{
-    self.controlBar.backgroundColor = [UIColor colorWithWhite:1 alpha:0.3];
-    self.playBtn.imageView.contentMode = UIViewContentModeScaleAspectFit;
 }
 
 - (void)initAVPlayerWithUrl:(NSString *)url
@@ -180,30 +174,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
     _currentPlayerState = state;
 }
 
-- (void)seekToProcess:(CGFloat)process withComplete:(void (^)())complete
-{
-    //保存调整进度之前的状态
-    PlayerState proPlayerState = _currentPlayerState;
-    
-    if (_currentPlayerState == PlayerIsStart)
-    {
-        [_playerView pause];
-    }
-    
-    [self.playerView seekToTime:CMTimeMake(_durationTime * process, 1) completionHandler:^(BOOL finished) {
-        
-          //恢复调整进度之前的状态
-        if (proPlayerState == PlayerIsStart)
-        {
-            [_playerView play];
-        }
-        
-        if (complete)
-        {
-            complete();
-        }
-     }];
-}
 
 #pragma mark -- Public API
 + (PlayerView *)playerView
@@ -346,21 +316,29 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 #pragma mark -- <PlayerCustomSliderProtocol>
 
-- (void)slider:(PlayerCustomSlider *)slider valueChangedBegin:(CGFloat)value
-{
-
-}
-
 - (void)slider:(PlayerCustomSlider *)slider valueChangedEnd:(CGFloat)value
 {
+    PlayerState ProPlayerState = _currentPlayerState;
+    
+    //停止刷新UI
     _stopUpdateUI = YES;
     
-    [_playerView pause];
+    //暂停视频
+    if (_currentPlayerState == PlayerIsStart)
+    {
+        [_playerView pause];
+    }
     
+    //调整进度
     [_playerView seekToTime:CMTimeMake(_durationTime * value, 1) completionHandler:^(BOOL finished) {
         
-        [_playerView play];
-        
+        //恢复播放
+        if (ProPlayerState == PlayerIsStart)
+        {
+            [_playerView play];
+        }
+     
+        //开始刷新UI
         _stopUpdateUI = NO;
         
     }];
