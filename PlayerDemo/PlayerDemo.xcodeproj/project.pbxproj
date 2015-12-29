@@ -15,8 +15,8 @@
 		2F0B01681C2B9279003F2522 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2F0B01661C2B9279003F2522 /* MainViewController.xib */; };
 		2F0B019F1C2BBBD9003F2522 /* PlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F0B019E1C2BBBD9003F2522 /* PlayerView.m */; };
 		2F0B01A11C2BBC2B003F2522 /* PlayerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2F0B01A01C2BBC2B003F2522 /* PlayerView.xib */; };
-		2F0B01C41C2CDDE0003F2522 /* PlayerSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F0B01C31C2CDDE0003F2522 /* PlayerSlider.m */; };
 		2F0B01C61C2D119E003F2522 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F0B01C51C2D119E003F2522 /* AVFoundation.framework */; };
+		2FD8136F1C3222A20096688F /* PlayerCustomSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,9 +33,9 @@
 		2F0B019D1C2BBBD9003F2522 /* PlayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerView.h; sourceTree = "<group>"; };
 		2F0B019E1C2BBBD9003F2522 /* PlayerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerView.m; sourceTree = "<group>"; };
 		2F0B01A01C2BBC2B003F2522 /* PlayerView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayerView.xib; sourceTree = "<group>"; };
-		2F0B01C21C2CDDE0003F2522 /* PlayerSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerSlider.h; sourceTree = "<group>"; };
-		2F0B01C31C2CDDE0003F2522 /* PlayerSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerSlider.m; sourceTree = "<group>"; };
 		2F0B01C51C2D119E003F2522 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		2FD8136D1C3222A20096688F /* PlayerCustomSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerCustomSlider.h; sourceTree = "<group>"; };
+		2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerCustomSlider.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,8 +78,8 @@
 				2F0B019D1C2BBBD9003F2522 /* PlayerView.h */,
 				2F0B019E1C2BBBD9003F2522 /* PlayerView.m */,
 				2F0B01A01C2BBC2B003F2522 /* PlayerView.xib */,
-				2F0B01C21C2CDDE0003F2522 /* PlayerSlider.h */,
-				2F0B01C31C2CDDE0003F2522 /* PlayerSlider.m */,
+				2FD8136D1C3222A20096688F /* PlayerCustomSlider.h */,
+				2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */,
 				2F0B01591C2B925E003F2522 /* Assets.xcassets */,
 				2F0B015B1C2B925E003F2522 /* LaunchScreen.storyboard */,
 				2F0B015E1C2B925E003F2522 /* Info.plist */,
@@ -169,8 +169,8 @@
 			files = (
 				2F0B01521C2B925E003F2522 /* AppDelegate.m in Sources */,
 				2F0B01671C2B9279003F2522 /* MainViewController.m in Sources */,
-				2F0B01C41C2CDDE0003F2522 /* PlayerSlider.m in Sources */,
 				2F0B014F1C2B925E003F2522 /* main.m in Sources */,
+				2FD8136F1C3222A20096688F /* PlayerCustomSlider.m in Sources */,
 				2F0B019F1C2BBBD9003F2522 /* PlayerView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

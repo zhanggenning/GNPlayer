@@ -9,11 +9,15 @@
 #import "MainViewController.h"
 #import "PlayerView.h"
 #import "PlayerSlider.h"
+#import "PlayerCustomSlider.h"
 
 @interface MainViewController ()
 {
     PlayerView *player;
 }
+
+@property (weak, nonatomic) IBOutlet PlayerCustomSlider *testSlider;
+
 @end
 
 @implementation MainViewController
@@ -25,6 +29,9 @@
     player = [PlayerView playerView];
     player.frame = CGRectMake(0, 0, 300, 200);
     [self.view addSubview:player];
+    
+    _testSlider.process = 0.5;
+    _testSlider.bufferProcess = 0.7;
 }
 
 - (void)didReceiveMemoryWarning {

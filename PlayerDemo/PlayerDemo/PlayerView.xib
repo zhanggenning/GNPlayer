@@ -32,12 +32,9 @@
                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UKX-Q1-Bal" customClass="PlayerSlider">
-                            <rect key="frame" x="85" y="8" width="461" height="24"/>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UKX-Q1-Bal" customClass="PlayerCustomSlider">
+                            <rect key="frame" x="93" y="8" width="445" height="24"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            <connections>
-                                <action selector="sliderValueChangeEnd:" destination="iN0-l3-epB" eventType="touchUpInside" id="oPX-sf-lbl"/>
-                            </connections>
                         </view>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f9K-Sy-mnV">
                             <rect key="frame" x="0.0" y="0.0" width="40" height="40"/>
@@ -56,16 +53,16 @@
                     <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                     <constraints>
                         <constraint firstAttribute="bottom" secondItem="MuT-ga-01f" secondAttribute="bottom" id="1ms-iJ-u1y"/>
-                        <constraint firstItem="R3y-mO-icW" firstAttribute="leading" secondItem="UKX-Q1-Bal" secondAttribute="trailing" id="2Th-as-Q97"/>
-                        <constraint firstAttribute="bottom" secondItem="UKX-Q1-Bal" secondAttribute="bottom" constant="8" id="5CC-aj-pDU"/>
+                        <constraint firstItem="UKX-Q1-Bal" firstAttribute="leading" secondItem="MuT-ga-01f" secondAttribute="trailing" constant="8" id="6xg-SA-vFz"/>
                         <constraint firstItem="MuT-ga-01f" firstAttribute="leading" secondItem="f9K-Sy-mnV" secondAttribute="trailing" id="7GR-IZ-Pyt"/>
                         <constraint firstAttribute="bottom" secondItem="f9K-Sy-mnV" secondAttribute="bottom" id="9Da-ag-Pue"/>
                         <constraint firstAttribute="height" constant="40" id="B56-0C-Y5T"/>
+                        <constraint firstAttribute="bottom" secondItem="UKX-Q1-Bal" secondAttribute="bottom" constant="8" id="EPw-7M-GO2"/>
                         <constraint firstItem="f9K-Sy-mnV" firstAttribute="top" secondItem="XyQ-EC-NQ8" secondAttribute="top" id="UwZ-Yx-k3A"/>
-                        <constraint firstItem="UKX-Q1-Bal" firstAttribute="top" secondItem="XyQ-EC-NQ8" secondAttribute="top" constant="8" id="Yju-rZ-Pqr"/>
+                        <constraint firstItem="R3y-mO-icW" firstAttribute="leading" secondItem="UKX-Q1-Bal" secondAttribute="trailing" constant="8" id="X61-wz-A8b"/>
+                        <constraint firstItem="UKX-Q1-Bal" firstAttribute="top" secondItem="XyQ-EC-NQ8" secondAttribute="top" constant="8" id="Z3g-Of-hto"/>
                         <constraint firstItem="MuT-ga-01f" firstAttribute="top" secondItem="XyQ-EC-NQ8" secondAttribute="top" id="haE-1e-VpE"/>
                         <constraint firstItem="R3y-mO-icW" firstAttribute="top" secondItem="XyQ-EC-NQ8" secondAttribute="top" id="r2o-h7-B17"/>
-                        <constraint firstItem="UKX-Q1-Bal" firstAttribute="leading" secondItem="MuT-ga-01f" secondAttribute="trailing" id="s5D-Rb-Xmy"/>
                         <constraint firstItem="f9K-Sy-mnV" firstAttribute="leading" secondItem="XyQ-EC-NQ8" secondAttribute="leading" id="swE-bj-5Dq"/>
                         <constraint firstAttribute="bottom" secondItem="R3y-mO-icW" secondAttribute="bottom" id="tBo-5v-0TC"/>
                         <constraint firstAttribute="trailing" secondItem="R3y-mO-icW" secondAttribute="trailing" constant="9" id="ven-Ri-zS0"/>
@@ -85,7 +82,7 @@
                 <outlet property="currentTimeLab" destination="MuT-ga-01f" id="2s0-nj-uPI"/>
                 <outlet property="durationLab" destination="R3y-mO-icW" id="e6r-pB-gmG"/>
                 <outlet property="playBtn" destination="f9K-Sy-mnV" id="1bD-Ey-rkr"/>
-                <outlet property="playerSlider" destination="UKX-Q1-Bal" id="SpF-2b-PHe"/>
+                <outlet property="playerSlider" destination="UKX-Q1-Bal" id="mm6-2L-Q4O"/>
             </connections>
             <point key="canvasLocation" x="656" y="441"/>
         </view>
