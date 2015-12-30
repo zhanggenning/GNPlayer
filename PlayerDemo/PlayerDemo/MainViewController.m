@@ -48,6 +48,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     {
         player = [PlayerView playerViewWithUrl:kTestUrl];
         player.frame = CGRectMake(0, 0, 300, 200);
+        player.isAutoPlay = YES;
         [self.view addSubview:player];
     }
     else if (btn.tag == 11)
