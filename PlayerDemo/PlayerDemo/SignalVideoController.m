@@ -48,16 +48,21 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 {
     NSArray *names = @[@"添加", @"移除"];
     
+    UIView *backView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100 * 2 + 100, 50)];
+    backView.tag = 20;
+    
     for (int i = 0; i < names.count; i++)
     {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-        btn.frame = CGRectMake((80 + i * 100), 380, 50, 30);
+        btn.frame = CGRectMake(i * (100 + 100), 0, 100, 50);
         btn.tag = 10 + i;
         [btn setTitle:names[i] forState:UIControlStateNormal];
         [btn addTarget:self action:@selector(btnAction:) forControlEvents:UIControlEventTouchUpInside];
         btn.backgroundColor = [UIColor greenColor];
-        [self.view addSubview:btn];
+        [backView addSubview:btn];
     }
+    
+    [self.view addSubview:backView];
 }
 
 - (void)btnAction:(UIButton *)btn
@@ -72,15 +77,23 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     }
 }
 
+- (void)viewDidLayoutSubviews
+{
+    UIView *backView = [self.view viewWithTag:20];
+    backView.center = CGPointMake(self.view.bounds.size.width / 2, 124);
+    
+    if (_player)
+    {
+        _player.center = CGPointMake(self.view.frame.size.width / 2,
+                                     backView.center.y + backView.frame.size.height / 2 + 20 + _player.frame.size.height / 2);
+    }
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
-- (void)viewDidLayoutSubviews
-{
-    _player.center = self.view.center;
-}
 
 /*
 #pragma mark - Navigation
