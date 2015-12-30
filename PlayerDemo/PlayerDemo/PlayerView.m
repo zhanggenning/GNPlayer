@@ -10,6 +10,8 @@
 #import "PlayerView.h"
 #import "PlayerCustomSlider.h"
 
+static CGFloat const kPlayerControlBarShowTime = 5.0;
+
 typedef NS_ENUM(NSInteger, PlayerState)
 {
     PlayerIsStop = 0,  //视频已经停止
@@ -19,18 +21,18 @@ typedef NS_ENUM(NSInteger, PlayerState)
 };
 
 @interface PlayerView ()<PlayerCustomSliderProtocol, UIGestureRecognizerDelegate>
-
 {
     BOOL _stopUpdateUI; //停止刷新UI
     
     NSTimer *_moniorTimer; //定时器
+    CGFloat _controlBarShowTime;
     
     CGFloat _currentTime; //当前播放时间(单位 s)
     CGFloat _bufferTime; //缓冲时间(单位 s)
     CGFloat _durationTime; //总时长.(单位 s)
 }
 
-@property (nonatomic, copy) NSString *videoUrl;
+@property (nonatomic, copy) NSString *videoUrl; //视频url
 @property (nonatomic, assign) PlayerState currentPlayerState; //播放器状态
 
 @property (strong, nonatomic) AVPlayer *avPlayer;
@@ -42,6 +44,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
 @property (weak, nonatomic) IBOutlet UIButton *playBtn;
 @property (weak, nonatomic) IBOutlet PlayerCustomSlider *playerSlider;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *indicatorView;
+
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constraint_bottomDistance; //控制栏距离底部距离
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constraint_controlBarHeight; //控制栏高度
 
 @end
 
@@ -120,7 +125,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
 {
     if (!_moniorTimer)
     {
-        _moniorTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(playTimeMonior) userInfo:nil repeats:YES];
+        _moniorTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(playerMonitorService) userInfo:nil repeats:YES];
     }
 }
 
@@ -137,8 +142,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
 {
     [self swithPlayerState:PlayerIsStop];
     
-    self.controlBar.alpha = 0;
-  
+    //隐藏控制栏
+    _constraint_bottomDistance.constant = 0 - _constraint_controlBarHeight.constant;
+    
     //进度条
     self.playerSlider.process = 0.0;
     self.playerSlider.bufferProcess = 0.0;
@@ -161,6 +167,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     _stopUpdateUI = YES;
 }
 
+//更新UI
 - (void)updateUI
 {
     if (_stopUpdateUI)
@@ -190,6 +197,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     });
 }
 
+//重置UI
 - (void)resetUI
 {
     __weak typeof(self) weakSelf = self;
@@ -207,6 +215,74 @@ typedef NS_ENUM(NSInteger, PlayerState)
     });
 }
 
+//监控UI
+- (void)moniorUI
+{
+    //控制条
+    if (_constraint_bottomDistance.constant == 0)
+    {
+        if (--_controlBarShowTime == 0)
+        {
+            [UIView animateWithDuration:0.5 animations:^{
+                
+                _constraint_bottomDistance.constant = -_constraint_controlBarHeight.constant;
+                
+                [_controlBar layoutIfNeeded];
+            }];
+        }
+    }
+}
+
+//监控播放器播放状态
+- (void)moniorPlayerState
+{
+    if (!_avPlayer.currentItem)
+    {
+        NSLog(@"AVPlayerItem 为空.");
+        
+        return;
+    }
+    
+    if (_avPlayer.currentItem.status == AVPlayerItemStatusReadyToPlay) //准备播放时开始监控
+    {
+        _durationTime = CMTimeGetSeconds(_avPlayer.currentItem.duration);  //计算视频时长
+        
+        _currentTime = CMTimeGetSeconds(_avPlayer.currentItem.currentTime); //计算播放时间
+        
+        _bufferTime = [self availableDurationWithLoadedTimeRanges:_avPlayer.currentItem.loadedTimeRanges]; //缓冲时间
+        
+        if (_bufferTime != _durationTime && _currentTime >= _bufferTime - 2)
+        {
+            if (_currentPlayerState == PlayerIsStart)
+            {
+                [_avPlayer pause];
+                
+                [self swithPlayerState:PlayerIsBuffering];
+            }
+        }
+        else
+        {
+            if (_currentPlayerState == PlayerIsBuffering)
+            {
+                [_avPlayer play];
+                
+                [self swithPlayerState:PlayerIsStart];
+            }
+        }
+        
+        //更新UI
+        [self updateUI];
+    }
+    else if (_avPlayer.currentItem.status == AVPlayerItemStatusFailed)
+    {
+        [self swithPlayerState:PlayerIsFail];
+    }
+    else
+    {
+        [self swithPlayerState:PlayerIsBuffering];
+    }
+
+}
 
 //改变播放状态
 - (void)swithPlayerState:(PlayerState)state
@@ -330,7 +406,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
-//播放结束
+//播放结束通知
 - (void)moviePlayDidEnd
 {
     __weak typeof(self) weakSelf = self;
@@ -347,84 +423,43 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }];
 }
 
-//播放时间监控
-- (void)playTimeMonior
+//监控服务
+- (void)playerMonitorService
 {
-    if (!_avPlayer.currentItem)
-    {
-        NSLog(@"AVPlayerItem 为空.");
-        
-        return;
-    }
+    //监控控制条
+    [self moniorUI];
     
-    if (_avPlayer.currentItem.status == AVPlayerItemStatusReadyToPlay) //准备播放时开始监控
-    {
-        _durationTime = CMTimeGetSeconds(_avPlayer.currentItem.duration);  //计算视频时长
-        
-        _currentTime = CMTimeGetSeconds(_avPlayer.currentItem.currentTime); //计算播放时间
-        
-        _bufferTime = [self availableDurationWithLoadedTimeRanges:_avPlayer.currentItem.loadedTimeRanges]; //缓冲时间
-        
-        if (_bufferTime != _durationTime && _currentTime >= _bufferTime - 2)
-        {
-            if (_currentPlayerState == PlayerIsStart)
-            {
-                [_avPlayer pause];
-                
-                [self swithPlayerState:PlayerIsBuffering];
-            }
-        }
-        else
-        {
-            if (_currentPlayerState == PlayerIsBuffering)
-            {
-                [_avPlayer play];
-                
-                [self swithPlayerState:PlayerIsStart];
-            }
-        }
-        
-        //更新UI
-        [self updateUI];
-    }
-    else if (_avPlayer.currentItem.status == AVPlayerItemStatusFailed)
-    {
-        [self swithPlayerState:PlayerIsFail];
-    }
-    else
-    {
-        [self swithPlayerState:PlayerIsBuffering];
-    }
+    //监控播放状态
+    [self moniorPlayerState];
 }
 
 //单击隐藏控制栏
 - (void)tapAction
 {
-    if (_controlBar.alpha == 1)
+    CGFloat bottomDistance = _constraint_bottomDistance.constant;
+    CGFloat controlHeight = _constraint_controlBarHeight.constant;
+    
+    if (bottomDistance == 0)
     {
         [UIView animateWithDuration:0.5 animations:^{
             
-            _controlBar.alpha = 0;
-        }];
-    } else if (_controlBar.alpha == 0)
-    {
-        [UIView animateWithDuration:0.5 animations:^{
+            _constraint_bottomDistance.constant = -controlHeight;
             
-            _controlBar.alpha = 1;
+            [_controlBar layoutIfNeeded];
+    
         }];
     }
-    if (_controlBar.alpha == 1)
+    else if (bottomDistance == -controlHeight)
     {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(7 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.5 animations:^{
             
-            [UIView animateWithDuration:0.5 animations:^{
-                
-                _controlBar.alpha = 0;
-            }];
+            _constraint_bottomDistance.constant = 0;
             
-        });
+            [_controlBar layoutIfNeeded];
+        }];
     }
 }
+
 
 #pragma mark -- Tools
 //转换时间格式
@@ -493,6 +528,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
 #pragma mark -- <UIGestureRecognizerDelegate>
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
+    //点击事件发生，重置控制栏显示时间
+    _controlBarShowTime = kPlayerControlBarShowTime;
+    
     if ([touch.view isKindOfClass:[self class]])
     {
         return YES;

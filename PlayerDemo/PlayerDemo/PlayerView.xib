@@ -7,7 +7,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
-        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="PlayerView">
+        <view clipsSubviews="YES" contentMode="scaleToFill" id="iN0-l3-epB" customClass="PlayerView">
             <rect key="frame" x="0.0" y="0.0" width="600" height="300"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
@@ -82,6 +82,8 @@
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="constraint_bottomDistance" destination="yU1-PQ-bRS" id="ed9-nY-EB5"/>
+                <outlet property="constraint_controlBarHeight" destination="B56-0C-Y5T" id="3X7-Ac-FO2"/>
                 <outlet property="controlBar" destination="XyQ-EC-NQ8" id="ai4-uI-eTq"/>
                 <outlet property="currentTimeLab" destination="MuT-ga-01f" id="2s0-nj-uPI"/>
                 <outlet property="durationLab" destination="R3y-mO-icW" id="e6r-pB-gmG"/>
