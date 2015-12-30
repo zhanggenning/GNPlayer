@@ -7,6 +7,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MainViewController">
             <connections>
+                <outlet property="mainTable" destination="vWH-q8-h8p" id="tV3-V1-eRy"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -14,6 +15,22 @@
         <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
             <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="vWH-q8-h8p">
+                    <rect key="frame" x="20" y="100" width="560" height="400"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <connections>
+                        <outlet property="dataSource" destination="-1" id="xde-sw-9Sl"/>
+                        <outlet property="delegate" destination="-1" id="Qbw-27-LQc"/>
+                    </connections>
+                </tableView>
+            </subviews>
+            <constraints>
+                <constraint firstItem="vWH-q8-h8p" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="20" id="SMO-nK-4Ob"/>
+                <constraint firstItem="vWH-q8-h8p" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="100" id="UOb-fN-24Q"/>
+                <constraint firstAttribute="trailing" secondItem="vWH-q8-h8p" secondAttribute="trailing" constant="20" id="aeT-D3-gSj"/>
+                <constraint firstAttribute="bottom" secondItem="vWH-q8-h8p" secondAttribute="bottom" constant="100" id="y8V-fk-EWi"/>
+            </constraints>
             <point key="canvasLocation" x="305" y="285"/>
         </view>
     </objects>

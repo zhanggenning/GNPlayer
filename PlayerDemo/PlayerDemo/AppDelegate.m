@@ -24,9 +24,8 @@
     [self.window makeKeyAndVisible];
 
 
-    self.window.rootViewController = [MainViewController new];
-    
-
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:[MainViewController new]];
+    self.window.rootViewController = nav;
     
     return YES;
 }
