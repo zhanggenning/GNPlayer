@@ -42,8 +42,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
 @property (weak, nonatomic) IBOutlet PlayerCustomSlider *playerSlider;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *indicatorView;
 
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constraint_controlBarHeight;
-
 @end
 
 @implementation PlayerView
@@ -62,7 +60,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     [_avPlayer removeObserver:self forKeyPath:@"currentItem.status"];
     _avPlayer = nil;
     
-    NSLog(@"播放器释放... ");
+    NSLog(@"播放器释放...");
 }
 
 - (void)removeFromSuperview
@@ -108,7 +106,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
     
     [self swithPlayerState:PlayerIsStop];
     
- 
     //进度条
     self.playerSlider.process = 0.0;
     self.playerSlider.bufferProcess = 0.0;

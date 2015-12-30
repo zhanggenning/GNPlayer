@@ -33,7 +33,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     for (int i = 0; i < names.count; i++)
     {
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-        btn.frame = CGRectMake(i * 100, 320, 50, 30);
+        btn.frame = CGRectMake((80 + i * 100), 380, 50, 30);
         btn.tag = 10 + i;
         [btn setTitle:names[i] forState:UIControlStateNormal];
         [btn addTarget:self action:@selector(btnAction:) forControlEvents:UIControlEventTouchUpInside];

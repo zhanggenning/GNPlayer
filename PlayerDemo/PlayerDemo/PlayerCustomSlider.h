@@ -30,8 +30,6 @@
 
 - (void)slider:(PlayerCustomSlider *)slider valueChangedEnd:(CGFloat) value;
 
-- (void)slider:(PlayerCustomSlider *)slider valueChangedByTap:(CGFloat) value;
-
 @end
 
 
