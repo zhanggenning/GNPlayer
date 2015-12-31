@@ -86,6 +86,11 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
+- (void)layoutSubviews
+{
+    NSLog(@"control bar = [%@]", NSStringFromCGRect(_controlBar.frame));
+}
+
 #pragma mark -- Private API
 - (void)initAVPlayerWithUrl:(NSString *)url
 {
@@ -143,7 +148,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     [self swithPlayerState:PlayerIsStop];
     
     //隐藏控制栏
-    _constraint_bottomDistance.constant = 0 - _constraint_controlBarHeight.constant;
+//    _constraint_bottomDistance.constant = 0 - _constraint_controlBarHeight.constant;
     
     //进度条
     self.playerSlider.process = 0.0;
@@ -406,6 +411,28 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
+- (IBAction)fullScreenAction:(UIButton *)sender
+{
+    //切换全屏操作
+    if (_delegate && [_delegate respondsToSelector:@selector(playerViewFullScreen:)])
+    {
+        [_delegate playerViewFullScreen:self];
+    }
+    
+    //完毕后更改状态
+    _isFullScreen = !_isFullScreen;
+    
+    //更改图标
+    if (_isFullScreen)
+    {
+        [sender setTitle:@"正常" forState:UIControlStateNormal];
+    }
+    else
+    {
+        [sender setTitle:@"全屏" forState:UIControlStateNormal];
+    }
+}
+
 //播放结束通知
 - (void)moviePlayDidEnd
 {
@@ -419,6 +446,11 @@ typedef NS_ENUM(NSInteger, PlayerState)
         [strongSelf resetUI];
         
         [self swithPlayerState:PlayerIsStop];
+        
+        if (_delegate && [_delegate respondsToSelector:@selector(playerViewPlayEnd:)])
+        {
+            [_delegate playerViewPlayEnd:self];
+        }
     
     }];
 }
@@ -496,7 +528,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
 }
 
 #pragma mark -- <PlayerCustomSliderProtocol>
-
 - (void)slider:(PlayerCustomSlider *)slider valueChangedEnd:(CGFloat)value
 {
     PlayerState ProPlayerState = _currentPlayerState;

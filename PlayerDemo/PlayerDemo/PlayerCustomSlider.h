@@ -10,7 +10,6 @@
 
 @protocol PlayerCustomSliderProtocol;
 
-
 @interface PlayerCustomSlider : UIView
 
 @property (nonatomic, assign) CGFloat process;

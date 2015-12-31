@@ -14,7 +14,7 @@ static NSString * const kTestUrl1 = @"http://v.jxvdy.com/sendfile/w5bgP3A8JgiQQo
 static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU05040100vlD00k01.mp4?KID=unistore,video&Expires=1451374368&ssig=yrVbabKvgo";
 
 
-@interface SignalVideoController ()
+@interface SignalVideoController () <PlayerViewProtocol>
 {
     PlayerView *_player;
 }
@@ -25,15 +25,52 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    
     [self addBtton];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeFrames:) name:UIDeviceOrientationDidChangeNotification object:nil];
 }
 
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (BOOL)shouldAutorotate
+{
+    return NO;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskAll;
+}
+
+- (void)viewDidLayoutSubviews
+{
+    UIView *backView = [self.view viewWithTag:20];
+    backView.center = CGPointMake(self.view.bounds.size.width / 2, 124);
+    
+    if (_player)
+    {
+        if (_player.isFullScreen)
+        {
+            _player.center = self.view.center;
+        }
+        else
+        {
+            _player.center = CGPointMake(self.view.frame.size.width / 2,
+                                     backView.center.y + backView.frame.size.height / 2 + 20 + _player.frame.size.height / 2);
+        }
+    }
+}
+
+#pragma mark -- Private API
 - (void)createPlayer
 {
     _player = [PlayerView playerViewWithUrl:kTestUrl2];
     _player.frame = CGRectMake(0, 0, 300, 200);
     _player.autoPlay = YES;
+    _player.delegate = self;
     [self.view addSubview:_player];
 }
 
@@ -42,7 +79,6 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     [_player removeFromSuperview];
     _player = nil;
 }
-
 
 - (void)addBtton
 {
@@ -65,6 +101,8 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     [self.view addSubview:backView];
 }
 
+#pragma mark -- Events
+
 - (void)btnAction:(UIButton *)btn
 {
     if (btn.tag == 10)
@@ -77,32 +115,56 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     }
 }
 
-- (void)viewDidLayoutSubviews
+- (void)changeFrames:(NSNotification *)notification
 {
-    UIView *backView = [self.view viewWithTag:20];
-    backView.center = CGPointMake(self.view.bounds.size.width / 2, 124);
+    NSLog(@"change notification: %@", notification.userInfo);
     
-    if (_player)
+    switch ([UIDevice currentDevice].orientation)
     {
-        _player.center = CGPointMake(self.view.frame.size.width / 2,
-                                     backView.center.y + backView.frame.size.height / 2 + 20 + _player.frame.size.height / 2);
+        case UIInterfaceOrientationPortrait:
+            break;
+        case UIInterfaceOrientationPortraitUpsideDown:
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            break;
+        case UIDeviceOrientationLandscapeLeft:
+            break;
+        default:
+            break;
     }
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+#pragma mark -- <PlayerViewProtocol>
+
+- (void)playerViewFullScreen:(PlayerView *)playerView
+{
+    static CGRect rect;
+    
+    if (_player.isFullScreen)
+    {
+        _player.frame = rect;
+//        [UIView animateWithDuration:0.3 animations:^{
+//            _player.transform = CGAffineTransformIdentity;
+//        } completion:^(BOOL finished) {
+//            _player.frame = rect;
+//        }];
+    }
+    else
+    {
+        rect = _player.frame;
+
+        _player.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width);
+        
+//        [UIView animateWithDuration:0.3 animations:^{
+//            _player.transform = CGAffineTransformMakeRotation(M_PI_2);
+//        }];
+//        
+    }
 }
 
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (void)playerViewPlayEnd:(PlayerView *)playerView
+{
+    [self destroyPlayer];
 }
-*/
 
 @end

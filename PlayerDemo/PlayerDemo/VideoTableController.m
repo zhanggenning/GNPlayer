@@ -12,7 +12,7 @@
 
 static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU05040100vlD00k01.mp4?KID=unistore,video&Expires=1451374368&ssig=yrVbabKvgo";
 
-@interface VideoTableController () <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate>
+@interface VideoTableController () <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate, PlayerViewProtocol>
 
 {
     PlayerView *_playerView;
@@ -28,12 +28,43 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeFrames:) name:UIDeviceOrientationDidChangeNotification object:nil];
+    
     [_videoTable registerNib:[UINib nibWithNibName:NSStringFromClass([VideoCell class]) bundle:nil] forCellReuseIdentifier:@"cell"];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+
+- (void)changeFrames:(NSNotification *)notification
+{
+    NSLog(@"change notification: %@", notification.userInfo);
+    
+    if ([[UIDevice currentDevice] orientation]==UIInterfaceOrientationPortrait
+        || [[UIDevice currentDevice] orientation]==UIInterfaceOrientationPortraitUpsideDown)
+    {
+        NSLog(@"portrait");
+//        self.view.frame=CGRectMake(0, 0, height, width);
+    }
+    else
+    {
+        NSLog(@"landscape");
+//        self.view.frame=CGRectMake(0, 0, width, height);
+    }
+    NSLog(@"view is %@",self);
+}
+
+- (BOOL)shouldAutorotate
+{
+    return NO;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskAll;
 }
 
 //创建playerView
@@ -51,6 +82,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     _playerView = [PlayerView playerViewWithUrl:kTestUrl2];
     _playerView.frame = playerFrame;
     _playerView.autoPlay = YES;
+    _playerView.delegate = self;
     [_videoTable addSubview:_playerView];
 }
 
@@ -64,6 +96,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
         _playerView = nil;
     }
 }
+
 
 #pragma mark -- <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate>
 
@@ -122,7 +155,17 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
         }
         
     }
- 
+}
+
+#pragma mark -- <PlayerViewProtocol>
+- (void)playerViewPlayEnd:(PlayerView *)playerView
+{
+
+}
+
+- (void)playerViewFullScreen:(PlayerView *)playerView
+{
+
 }
 
 

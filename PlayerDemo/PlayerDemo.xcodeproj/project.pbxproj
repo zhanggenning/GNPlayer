@@ -21,6 +21,8 @@
 		2F10EB701C33DF23004B6671 /* SignalVideoController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F10EB6F1C33DF23004B6671 /* SignalVideoController.m */; };
 		2F10EB781C33EA15004B6671 /* VideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F10EB761C33EA15004B6671 /* VideoCell.m */; };
 		2F10EB791C33EA15004B6671 /* VideoCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2F10EB771C33EA15004B6671 /* VideoCell.xib */; };
+		2F10EBC41C3520D7004B6671 /* MyNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F10EBC31C3520D7004B6671 /* MyNavigationController.m */; };
+		2F10EBC71C3523A4004B6671 /* NSObject+X.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F10EBC61C3523A4004B6671 /* NSObject+X.m */; };
 		2FD8136F1C3222A20096688F /* PlayerCustomSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */; };
 /* End PBXBuildFile section */
 
@@ -47,6 +49,10 @@
 		2F10EB751C33EA15004B6671 /* VideoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoCell.h; sourceTree = "<group>"; };
 		2F10EB761C33EA15004B6671 /* VideoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VideoCell.m; sourceTree = "<group>"; };
 		2F10EB771C33EA15004B6671 /* VideoCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = VideoCell.xib; sourceTree = "<group>"; };
+		2F10EBC21C3520D7004B6671 /* MyNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyNavigationController.h; sourceTree = "<group>"; };
+		2F10EBC31C3520D7004B6671 /* MyNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyNavigationController.m; sourceTree = "<group>"; };
+		2F10EBC51C3523A4004B6671 /* NSObject+X.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+X.h"; sourceTree = "<group>"; };
+		2F10EBC61C3523A4004B6671 /* NSObject+X.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+X.m"; sourceTree = "<group>"; };
 		2FD8136D1C3222A20096688F /* PlayerCustomSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerCustomSlider.h; sourceTree = "<group>"; };
 		2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerCustomSlider.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -83,9 +89,12 @@
 		2F0B014C1C2B925E003F2522 /* PlayerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				2F10EBC81C352448004B6671 /* Catagory */,
 				2F10EB651C33DE37004B6671 /* PlayerView */,
 				2F0B01501C2B925E003F2522 /* AppDelegate.h */,
 				2F0B01511C2B925E003F2522 /* AppDelegate.m */,
+				2F10EBC21C3520D7004B6671 /* MyNavigationController.h */,
+				2F10EBC31C3520D7004B6671 /* MyNavigationController.m */,
 				2F0B01641C2B9279003F2522 /* MainViewController.h */,
 				2F0B01651C2B9279003F2522 /* MainViewController.m */,
 				2F0B01661C2B9279003F2522 /* MainViewController.xib */,
@@ -123,6 +132,15 @@
 				2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */,
 			);
 			name = PlayerView;
+			sourceTree = "<group>";
+		};
+		2F10EBC81C352448004B6671 /* Catagory */ = {
+			isa = PBXGroup;
+			children = (
+				2F10EBC51C3523A4004B6671 /* NSObject+X.h */,
+				2F10EBC61C3523A4004B6671 /* NSObject+X.m */,
+			);
+			name = Catagory;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,9 +216,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2F10EBC71C3523A4004B6671 /* NSObject+X.m in Sources */,
 				2F0B01521C2B925E003F2522 /* AppDelegate.m in Sources */,
 				2F0B01671C2B9279003F2522 /* MainViewController.m in Sources */,
 				2F0B014F1C2B925E003F2522 /* main.m in Sources */,
+				2F10EBC41C3520D7004B6671 /* MyNavigationController.m in Sources */,
 				2FD8136F1C3222A20096688F /* PlayerCustomSlider.m in Sources */,
 				2F10EB6C1C33DEB6004B6671 /* VideoTableController.m in Sources */,
 				2F10EB781C33EA15004B6671 /* VideoCell.m in Sources */,
