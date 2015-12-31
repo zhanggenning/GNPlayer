@@ -10,7 +10,7 @@
 
 @interface PlayerView : UIView
 
-@property (nonatomic, assign) BOOL isAutoPlay; //进入自动播放
+@property (nonatomic, assign) BOOL autoPlay; //进入自动播放
 
 + (PlayerView *)playerViewWithUrl:(NSString *)url;
 

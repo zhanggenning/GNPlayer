@@ -31,9 +31,9 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 
 - (void)createPlayer
 {
-    _player = [PlayerView playerViewWithUrl:kTestUrl1];
+    _player = [PlayerView playerViewWithUrl:kTestUrl2];
     _player.frame = CGRectMake(0, 0, 300, 200);
-    _player.isAutoPlay = YES;
+    _player.autoPlay = YES;
     [self.view addSubview:_player];
 }
 

@@ -15,6 +15,11 @@ typedef void(^PlayActionBlock)(NSIndexPath *indexPath);
 @property (nonatomic, strong) NSIndexPath *indexPath;
 @property (nonatomic, strong) PlayActionBlock playActionBlock;
 
+@property (weak, nonatomic) IBOutlet UIButton *playerImage;
+
+
 + (CGFloat)cellHeight;
+
+- (CGRect)playerRectByCellFrame:(CGRect)cellFrame;
 
 @end

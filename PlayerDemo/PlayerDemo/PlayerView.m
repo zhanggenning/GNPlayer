@@ -77,7 +77,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     if (newSuperview != NULL)
     {
         //添加到父视图，自动播放
-        if (_isAutoPlay && _avPlayer)
+        if (_autoPlay && _avPlayer)
         {
             [_avPlayer play];
             
@@ -94,7 +94,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     _avPlayer = [[AVPlayer alloc] initWithPlayerItem:_avPlayerItem];
     
     AVPlayerLayer *playLayer = (AVPlayerLayer *)self.layer;
-    playLayer.videoGravity = AVLayerVideoGravityResizeAspectFill; //视频填充模式
+    playLayer.videoGravity = AVLayerVideoGravityResizeAspect; //视频填充模式
     playLayer.player= _avPlayer;
  
     //保存url

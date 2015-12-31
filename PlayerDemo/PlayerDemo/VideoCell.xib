@@ -34,7 +34,7 @@
                                 </constraints>
                                 <state key="normal" backgroundImage="test"/>
                                 <connections>
-                                    <action selector="playAction:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="Ous-Eq-jgO"/>
+                                    <action selector="playAction:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="NC3-r8-8Ai"/>
                                 </connections>
                             </button>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="imgPlay" translatesAutoresizingMaskIntoConstraints="NO" id="W7u-Wm-fWt">
@@ -127,6 +127,7 @@
             </tableViewCellContentView>
             <connections>
                 <outlet property="backView" destination="LuR-QT-0hy" id="6aT-j9-HgQ"/>
+                <outlet property="playerImage" destination="qCG-a1-O3a" id="K6D-k6-MxF"/>
             </connections>
             <point key="canvasLocation" x="727" y="393.5"/>
         </tableViewCell>

@@ -10,6 +10,7 @@
 
 @interface VideoCell ()
 
+@property (weak, nonatomic) UIView *topView;
 @property (weak, nonatomic) IBOutlet UIView *backView;
 
 @end
@@ -38,12 +39,24 @@
     return 8 + labelHeight + 8 + imgHeihgt + 8 + btnViewHeight + 8 + 8;
 }
 
+- (CGRect)playerRectByCellFrame:(CGRect)cellFrame;
+{
+    CGRect rect = [_playerImage convertRect:_playerImage.bounds toView:self.contentView];
+    
+    CGFloat playerX = rect.origin.x + cellFrame.origin.x;
+    CGFloat playerY = rect.origin.y + cellFrame.origin.y;
+    CGFloat playerWidth = rect.size.width * cellFrame.size.width / self.frame.size.width;
+    CGFloat playerHeight = rect.size.height * cellFrame.size.height / self.frame.size.height;
+    
+    return CGRectMake(playerX, playerY, playerWidth, playerHeight);
+}
+
 - (IBAction)playAction:(UIButton *)sender
 {
+    
     if (_playActionBlock)
     {
         _playActionBlock(_indexPath);
     }
 }
-
 @end
