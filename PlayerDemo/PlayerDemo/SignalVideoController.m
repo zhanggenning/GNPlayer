@@ -52,7 +52,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     
     if (_player)
     {
-        if (_player.isFullScreen)
+        if (_player.playerModel == PlayerModelFullScreen)
         {
             _player.center = self.view.center;
         }
@@ -136,35 +136,30 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 
 #pragma mark -- <PlayerViewProtocol>
 
-- (void)playerViewFullScreen:(PlayerView *)playerView
-{
-    static CGRect rect;
-    
-    if (_player.isFullScreen)
-    {
-        _player.frame = rect;
-//        [UIView animateWithDuration:0.3 animations:^{
-//            _player.transform = CGAffineTransformIdentity;
-//        } completion:^(BOOL finished) {
-//            _player.frame = rect;
-//        }];
-    }
-    else
-    {
-        rect = _player.frame;
-
-        _player.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width);
-        
-//        [UIView animateWithDuration:0.3 animations:^{
-//            _player.transform = CGAffineTransformMakeRotation(M_PI_2);
-//        }];
-//        
-    }
-}
-
 - (void)playerViewPlayEnd:(PlayerView *)playerView
 {
     [self destroyPlayer];
+}
+
+- (void)playerWillSwitchModel:(PlayerModel)playerModel
+{
+    switch (playerModel)
+    {
+        case PlayerModelNormal:
+        {
+            NSLog(@"正常模式");
+            self.navigationController.navigationBarHidden = NO;
+            break;
+        }
+        case PlayerModelFullScreen:
+        {
+            NSLog(@"全屏模式");
+            self.navigationController.navigationBarHidden = YES;
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 @end

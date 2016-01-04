@@ -39,4 +39,17 @@
     return UIInterfaceOrientationMaskPortrait;
 }
 
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+     //转发一下
+    
+    UIViewController* top = self.topViewController;
+    
+    if ([top haveInstanceMethod:@selector(preferredStatusBarStyle)])
+    {
+        return [top preferredStatusBarStyle];
+    }
+    return UIStatusBarStyleDefault;
+}
+
 @end

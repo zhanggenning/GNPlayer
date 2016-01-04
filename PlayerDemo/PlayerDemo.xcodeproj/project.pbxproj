@@ -23,6 +23,8 @@
 		2F10EB791C33EA15004B6671 /* VideoCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2F10EB771C33EA15004B6671 /* VideoCell.xib */; };
 		2F10EBC41C3520D7004B6671 /* MyNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F10EBC31C3520D7004B6671 /* MyNavigationController.m */; };
 		2F10EBC71C3523A4004B6671 /* NSObject+X.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F10EBC61C3523A4004B6671 /* NSObject+X.m */; };
+		2F9FF3991C3A183900770C11 /* PlayerControlBarBase.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F9FF3981C3A183900770C11 /* PlayerControlBarBase.m */; };
+		2F9FF39F1C3A18C100770C11 /* PlayerControlBarBase.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2F9FF39E1C3A18C100770C11 /* PlayerControlBarBase.xib */; };
 		2FD8136F1C3222A20096688F /* PlayerCustomSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */; };
 /* End PBXBuildFile section */
 
@@ -53,6 +55,10 @@
 		2F10EBC31C3520D7004B6671 /* MyNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyNavigationController.m; sourceTree = "<group>"; };
 		2F10EBC51C3523A4004B6671 /* NSObject+X.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+X.h"; sourceTree = "<group>"; };
 		2F10EBC61C3523A4004B6671 /* NSObject+X.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+X.m"; sourceTree = "<group>"; };
+		2F9FF3971C3A183900770C11 /* PlayerControlBarBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerControlBarBase.h; sourceTree = "<group>"; };
+		2F9FF3981C3A183900770C11 /* PlayerControlBarBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerControlBarBase.m; sourceTree = "<group>"; };
+		2F9FF39E1C3A18C100770C11 /* PlayerControlBarBase.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayerControlBarBase.xib; sourceTree = "<group>"; };
+		2F9FF3A41C3A421500770C11 /* PlayerControlProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerControlProtocol.h; sourceTree = "<group>"; };
 		2FD8136D1C3222A20096688F /* PlayerCustomSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerCustomSlider.h; sourceTree = "<group>"; };
 		2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayerCustomSlider.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +95,7 @@
 		2F0B014C1C2B925E003F2522 /* PlayerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				2F9FF3961C3A11A900770C11 /* Controllers */,
 				2F10EBC81C352448004B6671 /* Catagory */,
 				2F10EB651C33DE37004B6671 /* PlayerView */,
 				2F0B01501C2B925E003F2522 /* AppDelegate.h */,
@@ -98,14 +105,6 @@
 				2F0B01641C2B9279003F2522 /* MainViewController.h */,
 				2F0B01651C2B9279003F2522 /* MainViewController.m */,
 				2F0B01661C2B9279003F2522 /* MainViewController.xib */,
-				2F10EB6E1C33DF23004B6671 /* SignalVideoController.h */,
-				2F10EB6F1C33DF23004B6671 /* SignalVideoController.m */,
-				2F10EB691C33DEB6004B6671 /* VideoTableController.h */,
-				2F10EB6A1C33DEB6004B6671 /* VideoTableController.m */,
-				2F10EB6B1C33DEB6004B6671 /* VideoTableController.xib */,
-				2F10EB751C33EA15004B6671 /* VideoCell.h */,
-				2F10EB761C33EA15004B6671 /* VideoCell.m */,
-				2F10EB771C33EA15004B6671 /* VideoCell.xib */,
 				2F0B01591C2B925E003F2522 /* Assets.xcassets */,
 				2F0B015B1C2B925E003F2522 /* LaunchScreen.storyboard */,
 				2F0B015E1C2B925E003F2522 /* Info.plist */,
@@ -130,6 +129,10 @@
 				2F0B01A01C2BBC2B003F2522 /* PlayerView.xib */,
 				2FD8136D1C3222A20096688F /* PlayerCustomSlider.h */,
 				2FD8136E1C3222A20096688F /* PlayerCustomSlider.m */,
+				2F9FF3A41C3A421500770C11 /* PlayerControlProtocol.h */,
+				2F9FF3971C3A183900770C11 /* PlayerControlBarBase.h */,
+				2F9FF3981C3A183900770C11 /* PlayerControlBarBase.m */,
+				2F9FF39E1C3A18C100770C11 /* PlayerControlBarBase.xib */,
 			);
 			name = PlayerView;
 			sourceTree = "<group>";
@@ -141,6 +144,21 @@
 				2F10EBC61C3523A4004B6671 /* NSObject+X.m */,
 			);
 			name = Catagory;
+			sourceTree = "<group>";
+		};
+		2F9FF3961C3A11A900770C11 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				2F10EB6E1C33DF23004B6671 /* SignalVideoController.h */,
+				2F10EB6F1C33DF23004B6671 /* SignalVideoController.m */,
+				2F10EB691C33DEB6004B6671 /* VideoTableController.h */,
+				2F10EB6A1C33DEB6004B6671 /* VideoTableController.m */,
+				2F10EB6B1C33DEB6004B6671 /* VideoTableController.xib */,
+				2F10EB751C33EA15004B6671 /* VideoCell.h */,
+				2F10EB761C33EA15004B6671 /* VideoCell.m */,
+				2F10EB771C33EA15004B6671 /* VideoCell.xib */,
+			);
+			name = Controllers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -205,6 +223,7 @@
 				2F0B015A1C2B925E003F2522 /* Assets.xcassets in Resources */,
 				2F10EB791C33EA15004B6671 /* VideoCell.xib in Resources */,
 				2F10EB6D1C33DEB6004B6671 /* VideoTableController.xib in Resources */,
+				2F9FF39F1C3A18C100770C11 /* PlayerControlBarBase.xib in Resources */,
 				2F0B01A11C2BBC2B003F2522 /* PlayerView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -219,6 +238,7 @@
 				2F10EBC71C3523A4004B6671 /* NSObject+X.m in Sources */,
 				2F0B01521C2B925E003F2522 /* AppDelegate.m in Sources */,
 				2F0B01671C2B9279003F2522 /* MainViewController.m in Sources */,
+				2F9FF3991C3A183900770C11 /* PlayerControlBarBase.m in Sources */,
 				2F0B014F1C2B925E003F2522 /* main.m in Sources */,
 				2F10EBC41C3520D7004B6671 /* MyNavigationController.m in Sources */,
 				2FD8136F1C3222A20096688F /* PlayerCustomSlider.m in Sources */,

@@ -8,7 +8,9 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import "PlayerView.h"
-#import "PlayerCustomSlider.h"
+#import "PlayerControlProtocol.h"
+
+#import "PlayerControlBarBase.h"
 
 static CGFloat const kPlayerControlBarShowTime = 5.0;
 
@@ -20,8 +22,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
     PlayerIsFail,      //视频播放失败
 };
 
-@interface PlayerView ()<PlayerCustomSliderProtocol, UIGestureRecognizerDelegate>
+@interface PlayerView ()<PlayerControlProtocol, UIGestureRecognizerDelegate>
 {
+    CGRect _selfFrame;
     BOOL _stopUpdateUI; //停止刷新UI
     
     NSTimer *_moniorTimer; //定时器
@@ -37,17 +40,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 @property (strong, nonatomic) AVPlayer *avPlayer;
 @property (strong, nonatomic) AVPlayerItem *avPlayerItem;
+@property (strong, nonatomic) PlayerControlBarBase *playerControlBar;
 
-@property (weak, nonatomic) IBOutlet UIView *controlBar;
-@property (weak, nonatomic) IBOutlet UILabel *currentTimeLab;
-@property (weak, nonatomic) IBOutlet UILabel *durationLab;
-@property (weak, nonatomic) IBOutlet UIButton *playBtn;
-@property (weak, nonatomic) IBOutlet PlayerCustomSlider *playerSlider;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *indicatorView;
-
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constraint_bottomDistance; //控制栏距离底部距离
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *constraint_controlBarHeight; //控制栏高度
-
 @end
 
 @implementation PlayerView
@@ -88,7 +83,21 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 - (void)layoutSubviews
 {
-    NSLog(@"control bar = [%@]", NSStringFromCGRect(_controlBar.frame));
+    if (!CGRectEqualToRect(_selfFrame, self.frame))
+    {
+        if (self.frame.size.height <= self.frame.size.width)
+        {
+            _indicatorView.center = CGPointMake(self.frame.size.width / 2, self.frame.size.height / 2);
+            _playerControlBar.frame = CGRectMake(0, self.frame.size.height - 35, self.frame.size.width, 35);
+        }
+        else
+        {
+            _indicatorView.center = CGPointMake(self.frame.size.height / 2, self.frame.size.width / 2);
+            _playerControlBar.frame = CGRectMake(0, self.frame.size.width - 35, self.frame.size.height, 35);
+        }
+
+        _selfFrame = self.frame;
+    }
 }
 
 #pragma mark -- Private API
@@ -145,20 +154,14 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 - (void)initUI
 {
+    //添加控制栏
+    _playerControlBar = [PlayerControlBarBase playerControlBar];
+    _playerControlBar.delegate = self;
+    [self addSubview:_playerControlBar];
+    
+    //切换状态
     [self swithPlayerState:PlayerIsStop];
     
-    //隐藏控制栏
-//    _constraint_bottomDistance.constant = 0 - _constraint_controlBarHeight.constant;
-    
-    //进度条
-    self.playerSlider.process = 0.0;
-    self.playerSlider.bufferProcess = 0.0;
-    self.playerSlider.delegate = self;
-    
-    //时间
-    self.currentTimeLab.text = @"00:00";
-    self.durationLab.text = @"00:00";
-
     //菊花
     self.indicatorView.hidden = YES;
     self.indicatorView.hidesWhenStopped = YES;
@@ -170,6 +173,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
     
     //关闭UI更新
     _stopUpdateUI = YES;
+    
+    //显示控制栏时间
+    _controlBarShowTime = kPlayerControlBarShowTime;
 }
 
 //更新UI
@@ -182,22 +188,22 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-            
+        
         __strong typeof(weakSelf) strongSelf = weakSelf;
             
         //更新视频时长
-        self.durationLab.text = [self convertTime:_durationTime];
+        strongSelf.playerControlBar.durationTime = _durationTime;
         
         //更新当前播放时间标签
-        strongSelf.currentTimeLab.text = [strongSelf convertTime:_currentTime];
+        strongSelf.playerControlBar.currentTime = _currentTime;
         
         if (_durationTime != 0)
         {
             //更新播放进度
-            strongSelf.playerSlider.process = _currentTime / _durationTime;
+            strongSelf.playerControlBar.process = _currentTime / _durationTime;
             
             //更新缓冲进度
-            strongSelf.playerSlider.bufferProcess = _bufferTime / _durationTime;
+            strongSelf.playerControlBar.bufferProcess = _bufferTime / _durationTime;
         }
     });
 }
@@ -212,10 +218,10 @@ typedef NS_ENUM(NSInteger, PlayerState)
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
         //更新当前播放时间标签
-        strongSelf.currentTimeLab.text = @"00:00";
+        strongSelf.playerControlBar.currentTime = 0.0;
         
         //更新播放进度
-        strongSelf.playerSlider.process = 0.0;
+        strongSelf.playerControlBar.process = 0.0;
         
     });
 }
@@ -224,16 +230,11 @@ typedef NS_ENUM(NSInteger, PlayerState)
 - (void)moniorUI
 {
     //控制条
-    if (_constraint_bottomDistance.constant == 0)
+    if (_playerControlBar.isHidden == NO)
     {
         if (--_controlBarShowTime == 0)
         {
-            [UIView animateWithDuration:0.5 animations:^{
-                
-                _constraint_bottomDistance.constant = -_constraint_controlBarHeight.constant;
-                
-                [_controlBar layoutIfNeeded];
-            }];
+            [_playerControlBar hiddenControlBarWithAnimation:YES];
         }
     }
 }
@@ -302,8 +303,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
         {
             _stopUpdateUI = NO;
             
-            [self.playBtn setImage:[UIImage imageNamed:@"player_play_btn"] forState:UIControlStateNormal];
-            [self.playBtn setImage:[UIImage imageNamed:@"player_play_btn_h"] forState:UIControlStateHighlighted];
+            _playerControlBar.playBtnState = kBtnStatePlay;
             
             [_indicatorView stopAnimating];
             
@@ -314,8 +314,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
         {
             _stopUpdateUI = NO;
             
-            [self.playBtn setImage:[UIImage imageNamed:@"player_pause_btn"] forState:UIControlStateNormal];
-            [self.playBtn setImage:[UIImage imageNamed:@"player_pause_btn_h"] forState:UIControlStateHighlighted];
+            _playerControlBar.playBtnState = kBtnStatePause;
             
             [_indicatorView stopAnimating];
             
@@ -326,8 +325,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
         {
             _stopUpdateUI = NO;
             
-            [self.playBtn setImage:[UIImage imageNamed:@"player_pause_btn"] forState:UIControlStateNormal];
-            [self.playBtn setImage:[UIImage imageNamed:@"player_pause_btn_h"] forState:UIControlStateHighlighted];
+            _playerControlBar.playBtnState = kBtnStatePause;
             
             [_indicatorView startAnimating];
             
@@ -338,8 +336,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
         {
             _stopUpdateUI = YES;
             
-            [self.playBtn setImage:[UIImage imageNamed:@"player_play_btn"] forState:UIControlStateNormal];
-            [self.playBtn setImage:[UIImage imageNamed:@"player_play_btn_h"] forState:UIControlStateHighlighted];
+            _playerControlBar.playBtnState = kBtnStatePlay;
             
             NSLog(@"视频播放失败");
             break;
@@ -351,6 +348,51 @@ typedef NS_ENUM(NSInteger, PlayerState)
     _currentPlayerState = state;
 }
 
+//切换播放器模式（全屏/普通）
+- (void)switchPlayerModel:(PlayerModel)model
+{
+    static CGRect rect;
+    
+    if (_playerModel == model)
+    {
+        return;
+    }
+    
+    switch (model)
+    {
+        case PlayerModelNormal:
+        {
+            _playerControlBar.alpha = 0;
+            [UIView animateWithDuration:0.3 animations:^{
+                self.transform = CGAffineTransformIdentity;
+                self.frame = rect;
+            } completion:^(BOOL finished) {
+                _playerControlBar.alpha = 1;
+            }];
+
+            break;
+        }
+        case PlayerModelFullScreen:
+        {
+            rect = self.frame;
+            
+            _playerControlBar.alpha = 0;
+            [UIView animateWithDuration:0.3 animations:^{
+                self.transform = CGAffineTransformMakeRotation(M_PI_2);
+                self.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
+                
+            } completion:^(BOOL finished) {
+                _playerControlBar.alpha = 1;
+            }];
+            
+            break;
+        }
+        default:
+            break;
+    }
+    
+    _playerModel = model;
+}
 
 #pragma mark -- Public API
 + (PlayerView *)playerViewWithUrl:(NSString *)url
@@ -370,8 +412,64 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 
 #pragma mark -- Events
-//播放按钮事件
-- (IBAction)playBtnEvent:(UIButton *)sender
+
+//播放结束通知
+- (void)moviePlayDidEnd
+{
+    __weak typeof(self) weakSelf = self;
+    
+    [self.avPlayer seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        
+        //重置UI
+        [strongSelf resetUI];
+        
+        [self swithPlayerState:PlayerIsStop];
+        
+        if (_delegate && [_delegate respondsToSelector:@selector(playerDidPlayEnd:)])
+        {
+            [_delegate playerDidPlayEnd:self];
+        }
+    }];
+}
+
+//监控服务
+- (void)playerMonitorService
+{
+    //监控控制条
+    [self moniorUI];
+    
+    //监控播放状态
+    [self moniorPlayerState];
+}
+
+//单击隐藏控制栏
+- (void)tapAction
+{
+    if (_playerControlBar.isHidden == NO)
+    {
+        [_playerControlBar hiddenControlBarWithAnimation:YES];
+    }
+    else
+    {
+        [_playerControlBar showControlBarWithAnimation:YES];
+    }
+}
+
+#pragma mark -- Tools
+
+- (NSTimeInterval)availableDurationWithLoadedTimeRanges:(NSArray *)loadedTimeRanges
+{
+    CMTimeRange timeRange = [loadedTimeRanges.firstObject CMTimeRangeValue]; //获取缓冲区
+    float startSeconds = CMTimeGetSeconds(timeRange.start);
+    float durationSeconds = CMTimeGetSeconds(timeRange.duration);
+    NSTimeInterval result = startSeconds + durationSeconds; //计算缓冲总进度
+    return result;
+}
+
+#pragma mark -- <PlayerControlProtocol>
+- (void)playerPlayBtnClicked
 {
     switch (_currentPlayerState)
     {
@@ -411,124 +509,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
-- (IBAction)fullScreenAction:(UIButton *)sender
-{
-    //切换全屏操作
-    if (_delegate && [_delegate respondsToSelector:@selector(playerViewFullScreen:)])
-    {
-        [_delegate playerViewFullScreen:self];
-    }
-    
-    //完毕后更改状态
-    _isFullScreen = !_isFullScreen;
-    
-    //更改图标
-    if (_isFullScreen)
-    {
-        [sender setTitle:@"正常" forState:UIControlStateNormal];
-    }
-    else
-    {
-        [sender setTitle:@"全屏" forState:UIControlStateNormal];
-    }
-}
-
-//播放结束通知
-- (void)moviePlayDidEnd
-{
-    __weak typeof(self) weakSelf = self;
-    
-    [self.avPlayer seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
-        
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        
-        //重置UI
-        [strongSelf resetUI];
-        
-        [self swithPlayerState:PlayerIsStop];
-        
-        if (_delegate && [_delegate respondsToSelector:@selector(playerViewPlayEnd:)])
-        {
-            [_delegate playerViewPlayEnd:self];
-        }
-    
-    }];
-}
-
-//监控服务
-- (void)playerMonitorService
-{
-    //监控控制条
-    [self moniorUI];
-    
-    //监控播放状态
-    [self moniorPlayerState];
-}
-
-//单击隐藏控制栏
-- (void)tapAction
-{
-    CGFloat bottomDistance = _constraint_bottomDistance.constant;
-    CGFloat controlHeight = _constraint_controlBarHeight.constant;
-    
-    if (bottomDistance == 0)
-    {
-        [UIView animateWithDuration:0.5 animations:^{
-            
-            _constraint_bottomDistance.constant = -controlHeight;
-            
-            [_controlBar layoutIfNeeded];
-    
-        }];
-    }
-    else if (bottomDistance == -controlHeight)
-    {
-        [UIView animateWithDuration:0.5 animations:^{
-            
-            _constraint_bottomDistance.constant = 0;
-            
-            [_controlBar layoutIfNeeded];
-        }];
-    }
-}
-
-
-#pragma mark -- Tools
-//转换时间格式
-- (NSString *)convertTime:(CGFloat)second
-{
-    static NSDateFormatter *dateFormatter = nil;
-    NSDate *d = [NSDate dateWithTimeIntervalSince1970:second];
-    
-    if (!dateFormatter)
-    {
-        dateFormatter = [[NSDateFormatter alloc] init];
-    }
-    
-    if (second/3600 >= 1)
-    {
-        [dateFormatter setDateFormat:@"HH:mm:ss"];
-    }
-    else
-    {
-        [dateFormatter setDateFormat:@"mm:ss"];
-    }
-    NSString *showtimeNew = [dateFormatter stringFromDate:d];
-    
-    return showtimeNew;
-}
-
-- (NSTimeInterval)availableDurationWithLoadedTimeRanges:(NSArray *)loadedTimeRanges
-{
-    CMTimeRange timeRange = [loadedTimeRanges.firstObject CMTimeRangeValue]; //获取缓冲区
-    float startSeconds = CMTimeGetSeconds(timeRange.start);
-    float durationSeconds = CMTimeGetSeconds(timeRange.duration);
-    NSTimeInterval result = startSeconds + durationSeconds; //计算缓冲总进度
-    return result;
-}
-
-#pragma mark -- <PlayerCustomSliderProtocol>
-- (void)slider:(PlayerCustomSlider *)slider valueChangedEnd:(CGFloat)value
+//进度条值改变
+- (void)playerSloderValueChangeEnd:(CGFloat)value
 {
     PlayerState ProPlayerState = _currentPlayerState;
     
@@ -549,11 +531,38 @@ typedef NS_ENUM(NSInteger, PlayerState)
         {
             [_avPlayer play];
         }
-     
+        
         //开始刷新UI
         _stopUpdateUI = NO;
         
     }];
+}
+
+//全屏按钮点击
+- (void)playerFullBtnClicked:(FullScreenBtnState)fullScreenBtnState
+{
+    switch (fullScreenBtnState)
+    {
+        case kBtnStateNormal:
+        {
+            [self switchPlayerModel:PlayerModelNormal];
+
+            break;
+        }
+        case kBtnStateFullState:
+        {
+            [self switchPlayerModel:PlayerModelFullScreen];
+ 
+            break;
+        }
+        default:
+            break;
+    }
+    
+    if (_delegate && [_delegate respondsToSelector:@selector(playerWillSwitchModel:)])
+    {
+        [_delegate playerWillSwitchModel:_playerModel];
+    }
 }
 
 #pragma mark -- <UIGestureRecognizerDelegate>

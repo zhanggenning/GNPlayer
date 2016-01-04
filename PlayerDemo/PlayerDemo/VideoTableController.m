@@ -153,19 +153,34 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
         {
             [self destoryPlayerView];
         }
-        
     }
 }
 
 #pragma mark -- <PlayerViewProtocol>
-- (void)playerViewPlayEnd:(PlayerView *)playerView
+- (void)playerDidPlayEnd:(PlayerView *)playerView
 {
-
+    [self destoryPlayerView];
 }
 
-- (void)playerViewFullScreen:(PlayerView *)playerView
+- (void)playerWillSwitchModel:(PlayerModel)playerModel
 {
-
+    switch (playerModel)
+    {
+        case PlayerModelNormal:
+        {
+            NSLog(@"正常模式");
+            self.navigationController.navigationBarHidden = NO;
+            break;
+        }
+        case PlayerModelFullScreen:
+        {
+            NSLog(@"全屏模式");
+            self.navigationController.navigationBarHidden = YES;
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 

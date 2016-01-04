@@ -10,11 +10,17 @@
 
 @protocol PlayerViewProtocol;
 
+typedef NS_ENUM(NSInteger, PlayerModel)
+{
+    PlayerModelNormal = 0, //普通模式
+    PlayerModelFullScreen, //全屏模式
+};
+
 @interface PlayerView : UIView
 
 @property (nonatomic, assign) BOOL autoPlay; //进入自动播放
 
-@property (nonatomic, assign) BOOL isFullScreen; //全屏状态
+@property (nonatomic, assign, readonly) PlayerModel playerModel; //全屏状态
 
 @property (nonatomic, weak) id<PlayerViewProtocol> delegate;
 
@@ -27,10 +33,10 @@
 
 @optional
 
-//播放完成
-- (void)playerViewPlayEnd:(PlayerView *)playerView;
+//播放已经完成
+- (void)playerDidPlayEnd:(PlayerView *)playerView;
 
-//全屏播放
-- (void)playerViewFullScreen:(PlayerView *)playerView;
+//即将切换屏幕显示模式（全屏/普通）
+- (void)playerWillSwitchModel:(PlayerModel)playerModel;
 
 @end

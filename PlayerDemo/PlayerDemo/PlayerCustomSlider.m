@@ -17,7 +17,6 @@ static const CGFloat kSliderThumbHeight = 20; //正方形滑块边长
     CALayer *_processLayer;
     CALayer *_bufferProcessLayer;
     UIImageView *_thumbView;
-
 }
 @end
 
