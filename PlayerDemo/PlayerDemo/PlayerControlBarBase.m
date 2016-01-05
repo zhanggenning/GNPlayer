@@ -32,7 +32,7 @@
     self.durationTime = 0.0;
     self.process = 0.0;
     self.bufferProcess = 0.0;
-    self.fullScreenBtnState = kBtnStateNormal;
+    self.scaleBtnState = kBtnStateNormal;
     
     _isHidden = NO;
     
@@ -104,27 +104,11 @@
     }
 }
 
-- (IBAction)fullScreenBtnCliced:(UIButton *)sender
+- (IBAction)fullScreenBtnClicked:(UIButton *)sender
 {
-    switch (_fullScreenBtnState)
+    if (_delegate && [_delegate respondsToSelector:@selector(playerScaleBtnClicked)])
     {
-        case kBtnStateNormal:
-        {
-            self.fullScreenBtnState = kBtnStateFullState;
-            break;
-        }
-        case kBtnStateFullState:
-        {
-            self.fullScreenBtnState = kBtnStateNormal;
-            break;
-        }
-        default:
-            break;
-    }
- 
-    if (_delegate && [_delegate respondsToSelector:@selector(playerFullBtnClicked:)])
-    {
-        [_delegate playerFullBtnClicked:_fullScreenBtnState];
+        [_delegate playerScaleBtnClicked];
     }
 }
 
@@ -207,18 +191,18 @@
 }
 
 //全屏状态
-- (void)setFullScreenBtnState:(FullScreenBtnState)fullScreenBtnState
+- (void)setScaleBtnState:(ScaleBtnState)scaleBtnState
 {
-    _fullScreenBtnState = fullScreenBtnState;
+    _scaleBtnState = scaleBtnState;
     
-    switch (fullScreenBtnState)
+    switch (scaleBtnState)
     {
         case kBtnStateNormal:
         {
             [_fullScreenBtn setTitle:@"全屏" forState:UIControlStateNormal];
             break;
         }
-        case kBtnStateFullState:
+        case kBtnStateFullScreen:
         {
             [_fullScreenBtn setTitle:@"普通" forState:UIControlStateNormal];
             break;

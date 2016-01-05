@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "PlayerControlBarBase.h"
 
 @protocol PlayerControlProtocol <NSObject>
 
@@ -20,6 +19,6 @@
 - (void)playerSloderValueChangeEnd:(CGFloat)value;
 
 //全屏按钮点击
-- (void)playerFullBtnClicked:(FullScreenBtnState)fullScreenBtnState;
+- (void)playerScaleBtnClicked;
 
 @end

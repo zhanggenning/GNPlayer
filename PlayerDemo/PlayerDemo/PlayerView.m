@@ -25,6 +25,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
 @interface PlayerView ()<PlayerControlProtocol, UIGestureRecognizerDelegate>
 {
     CGRect _selfFrame;
+    CGRect _initFrame;
     BOOL _stopUpdateUI; //停止刷新UI
     
     NSTimer *_moniorTimer; //定时器
@@ -41,8 +42,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
 @property (strong, nonatomic) AVPlayer *avPlayer;
 @property (strong, nonatomic) AVPlayerItem *avPlayerItem;
 @property (strong, nonatomic) PlayerControlBarBase *playerControlBar;
-
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *indicatorView;
+
 @end
 
 @implementation PlayerView
@@ -54,6 +55,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
+    
     [self deinitAVPlayer];
     
     NSLog(@"播放器释放");
@@ -71,6 +74,9 @@ typedef NS_ENUM(NSInteger, PlayerState)
 {
     if (newSuperview != NULL)
     {
+        //添加定时器
+        [self addTimer];
+        
         //添加到父视图，自动播放
         if (_autoPlay && _avPlayer)
         {
@@ -85,20 +91,18 @@ typedef NS_ENUM(NSInteger, PlayerState)
 {
     if (!CGRectEqualToRect(_selfFrame, self.frame))
     {
-        if (self.frame.size.height <= self.frame.size.width)
-        {
-            _indicatorView.center = CGPointMake(self.frame.size.width / 2, self.frame.size.height / 2);
-            _playerControlBar.frame = CGRectMake(0, self.frame.size.height - 35, self.frame.size.width, 35);
-        }
-        else
-        {
-            _indicatorView.center = CGPointMake(self.frame.size.height / 2, self.frame.size.width / 2);
-            _playerControlBar.frame = CGRectMake(0, self.frame.size.width - 35, self.frame.size.height, 35);
-        }
-
+        _indicatorView.center = CGPointMake(self.frame.size.width / 2, self.frame.size.height / 2);
+        _playerControlBar.frame = CGRectMake(0, self.frame.size.height - 35, self.frame.size.width, 35);
+        
         _selfFrame = self.frame;
+        
+        if (!CGRectEqualToRect(_selfFrame, [UIScreen mainScreen].bounds))
+        {
+            _initFrame = _selfFrame;
+        }
     }
 }
+
 
 #pragma mark -- Private API
 - (void)initAVPlayerWithUrl:(NSString *)url
@@ -287,7 +291,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
     {
         [self swithPlayerState:PlayerIsBuffering];
     }
-
 }
 
 //改变播放状态
@@ -348,50 +351,19 @@ typedef NS_ENUM(NSInteger, PlayerState)
     _currentPlayerState = state;
 }
 
-//切换播放器模式（全屏/普通）
-- (void)switchPlayerModel:(PlayerModel)model
+//强制转屏幕
+- (void)forceChangeDeviceOrientation:(UIDeviceOrientation)orientation
 {
-    static CGRect rect;
-    
-    if (_playerModel == model)
+    if ([[UIDevice currentDevice] respondsToSelector:@selector(setOrientation:)])
     {
-        return;
+        SEL selector = NSSelectorFromString(@"setOrientation:");
+        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[UIDevice instanceMethodSignatureForSelector:selector]];
+        [invocation setSelector:selector];
+        [invocation setTarget:[UIDevice currentDevice]];
+        int val = orientation;
+        [invocation setArgument:&val atIndex:2];
+        [invocation invoke];
     }
-    
-    switch (model)
-    {
-        case PlayerModelNormal:
-        {
-            _playerControlBar.alpha = 0;
-            [UIView animateWithDuration:0.3 animations:^{
-                self.transform = CGAffineTransformIdentity;
-                self.frame = rect;
-            } completion:^(BOOL finished) {
-                _playerControlBar.alpha = 1;
-            }];
-
-            break;
-        }
-        case PlayerModelFullScreen:
-        {
-            rect = self.frame;
-            
-            _playerControlBar.alpha = 0;
-            [UIView animateWithDuration:0.3 animations:^{
-                self.transform = CGAffineTransformMakeRotation(M_PI_2);
-                self.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height);
-                
-            } completion:^(BOOL finished) {
-                _playerControlBar.alpha = 1;
-            }];
-            
-            break;
-        }
-        default:
-            break;
-    }
-    
-    _playerModel = model;
 }
 
 #pragma mark -- Public API
@@ -404,14 +376,71 @@ typedef NS_ENUM(NSInteger, PlayerState)
     [player initUI];
     
     [player initAVPlayerWithUrl:url];
-    
-    [player addTimer];
 
+    [[NSNotificationCenter defaultCenter] addObserver:player selector:@selector(orientationDidChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
+    
     return player;
 }
 
-
 #pragma mark -- Events
+//屏幕旋转通知
+- (void)orientationDidChanged:(NSNotification *)note
+{
+#warning 注意：因为旋转过程中frame会变，为避免控制栏错乱，在旋转之前将其显示
+    [_playerControlBar showControlBarWithAnimation:NO];
+
+    switch ([UIDevice currentDevice].orientation)
+    {
+        case UIDeviceOrientationPortrait:
+        {
+            //隐藏控制栏
+            _playerControlBar.alpha = 0;
+            
+            //回调到外部做进一步处理
+            if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
+            {
+                [_delegate player:self willSwitchToModel:PlayerModelNormal];
+            }
+            
+            //执行转屏
+            [UIView animateWithDuration:0.3 animations:^{
+                self.frame = _initFrame;
+            }completion:^(BOOL finished) {
+                _playerControlBar.alpha = 1;
+                _playerControlBar.scaleBtnState = kBtnStateNormal;
+                _playerModel = PlayerModelNormal;
+            }];
+            
+            break;
+        }
+        case UIDeviceOrientationLandscapeLeft:
+        case UIDeviceOrientationLandscapeRight:
+        {
+            //隐藏控制栏
+            _playerControlBar.alpha = 0;
+            
+            //回调到外部做进一步处理
+            if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
+            {
+                [_delegate player:self willSwitchToModel:PlayerModelFullScreen];
+            }
+            
+            //执行转屏
+            [UIView animateWithDuration:0.3 animations:^{
+                self.frame = [UIScreen mainScreen].bounds;
+            } completion:^(BOOL finished) {
+                _playerControlBar.alpha = 1;
+                _playerControlBar.scaleBtnState = kBtnStateFullScreen;
+                _playerModel = PlayerModelFullScreen;
+            }];
+            
+            break;
+        }
+ 
+        default:
+            break;
+    }
+}
 
 //播放结束通知
 - (void)moviePlayDidEnd
@@ -509,6 +538,28 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
+//全屏按钮点击
+- (void)playerScaleBtnClicked
+{
+    switch (_playerModel)
+    {
+        case PlayerModelNormal:
+        {
+            [self forceChangeDeviceOrientation:UIDeviceOrientationLandscapeLeft];
+            
+            break;
+        }
+        case PlayerModelFullScreen:
+        {
+            [self forceChangeDeviceOrientation:UIDeviceOrientationPortrait];
+            
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 //进度条值改变
 - (void)playerSloderValueChangeEnd:(CGFloat)value
 {
@@ -536,33 +587,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
         _stopUpdateUI = NO;
         
     }];
-}
-
-//全屏按钮点击
-- (void)playerFullBtnClicked:(FullScreenBtnState)fullScreenBtnState
-{
-    switch (fullScreenBtnState)
-    {
-        case kBtnStateNormal:
-        {
-            [self switchPlayerModel:PlayerModelNormal];
-
-            break;
-        }
-        case kBtnStateFullState:
-        {
-            [self switchPlayerModel:PlayerModelFullScreen];
- 
-            break;
-        }
-        default:
-            break;
-    }
-    
-    if (_delegate && [_delegate respondsToSelector:@selector(playerWillSwitchModel:)])
-    {
-        [_delegate playerWillSwitchModel:_playerModel];
-    }
 }
 
 #pragma mark -- <UIGestureRecognizerDelegate>

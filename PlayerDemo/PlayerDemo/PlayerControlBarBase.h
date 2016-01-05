@@ -17,21 +17,15 @@ typedef NS_ENUM(NSInteger, PlayBtnState)
     kBtnStatePlay        //播放状态
 };
 
-typedef NS_ENUM(NSInteger, FullScreenBtnState)
+typedef NS_ENUM(NSInteger, ScaleBtnState)
 {
     kBtnStateNormal = 0, //常规状态
-    kBtnStateFullState   //全屏状态
-};
-
-typedef NS_ENUM(NSInteger, ControlModel)
-{
-    kControlModelVertical = 0, //垂直方向
-    kControlModelHorizontal,
+    kBtnStateFullScreen  //全屏状态
 };
 
 @interface PlayerControlBarBase : UIView
 
-@property (nonatomic, assign) PlayBtnState playBtnState; //播放状态
+@property (nonatomic, assign) PlayBtnState playBtnState; //播放状态（播放/暂停）
 
 @property (nonatomic, assign) CGFloat currentTime; //播放时间
 
@@ -41,7 +35,7 @@ typedef NS_ENUM(NSInteger, ControlModel)
 
 @property (nonatomic, assign) CGFloat bufferProcess; //缓冲进度
 
-@property (nonatomic, assign) FullScreenBtnState fullScreenBtnState; //全屏状态
+@property (nonatomic, assign) ScaleBtnState scaleBtnState; //缩放状态（全屏/普通）
 
 @property (nonatomic, assign, readonly) BOOL isHidden;
 

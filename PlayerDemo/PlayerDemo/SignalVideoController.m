@@ -17,6 +17,8 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 @interface SignalVideoController () <PlayerViewProtocol>
 {
     PlayerView *_player;
+    
+    CGRect _playerNormalFrame;
 }
 @end
 
@@ -25,9 +27,8 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    [self addBtton];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeFrames:) name:UIDeviceOrientationDidChangeNotification object:nil];
+    [self addBtton];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -37,38 +38,26 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 
 - (BOOL)shouldAutorotate
 {
-    return NO;
+    return YES;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
-    return UIInterfaceOrientationMaskAll;
+    return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
-- (void)viewDidLayoutSubviews
-{
-    UIView *backView = [self.view viewWithTag:20];
-    backView.center = CGPointMake(self.view.bounds.size.width / 2, 124);
-    
-    if (_player)
-    {
-        if (_player.playerModel == PlayerModelFullScreen)
-        {
-            _player.center = self.view.center;
-        }
-        else
-        {
-            _player.center = CGPointMake(self.view.frame.size.width / 2,
-                                     backView.center.y + backView.frame.size.height / 2 + 20 + _player.frame.size.height / 2);
-        }
-    }
-}
 
 #pragma mark -- Private API
 - (void)createPlayer
 {
     _player = [PlayerView playerViewWithUrl:kTestUrl2];
     _player.frame = CGRectMake(0, 0, 300, 200);
+    
+    UIView *backView = [self.view viewWithTag:20];
+    _player.center = CGPointMake(self.view.frame.size.width / 2,
+                                 backView.center.y + backView.frame.size.height / 2 + 20 + _player.frame.size.height / 2);
+    _playerNormalFrame = _player.frame;
+    
     _player.autoPlay = YES;
     _player.delegate = self;
     [self.view addSubview:_player];
@@ -85,6 +74,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     NSArray *names = @[@"添加", @"移除"];
     
     UIView *backView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100 * 2 + 100, 50)];
+    backView.center = CGPointMake(self.view.bounds.size.width / 2, 124);
     backView.tag = 20;
     
     for (int i = 0; i < names.count; i++)
@@ -101,6 +91,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     [self.view addSubview:backView];
 }
 
+
 #pragma mark -- Events
 
 - (void)btnAction:(UIButton *)btn
@@ -115,25 +106,6 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     }
 }
 
-- (void)changeFrames:(NSNotification *)notification
-{
-    NSLog(@"change notification: %@", notification.userInfo);
-    
-    switch ([UIDevice currentDevice].orientation)
-    {
-        case UIInterfaceOrientationPortrait:
-            break;
-        case UIInterfaceOrientationPortraitUpsideDown:
-            break;
-        case UIDeviceOrientationLandscapeRight:
-            break;
-        case UIDeviceOrientationLandscapeLeft:
-            break;
-        default:
-            break;
-    }
-}
-
 #pragma mark -- <PlayerViewProtocol>
 
 - (void)playerViewPlayEnd:(PlayerView *)playerView
@@ -141,20 +113,24 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     [self destroyPlayer];
 }
 
-- (void)playerWillSwitchModel:(PlayerModel)playerModel
+- (void)player:(PlayerView *)playerView willSwitchToModel:(PlayerModel)playerModel
 {
     switch (playerModel)
     {
         case PlayerModelNormal:
         {
-            NSLog(@"正常模式");
+            NSLog(@"[Demo] 切换至普通状态");
+            
             self.navigationController.navigationBarHidden = NO;
+            
             break;
         }
         case PlayerModelFullScreen:
         {
-            NSLog(@"全屏模式");
+            NSLog(@"[Demo] 切换至全屏状态");
+
             self.navigationController.navigationBarHidden = YES;
+            
             break;
         }
         default:

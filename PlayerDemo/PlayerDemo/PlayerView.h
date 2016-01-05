@@ -20,6 +20,8 @@ typedef NS_ENUM(NSInteger, PlayerModel)
 
 @property (nonatomic, assign) BOOL autoPlay; //进入自动播放
 
+@property (nonatomic, assign) CGFloat controlBarAlpha; //控制栏透明度
+
 @property (nonatomic, assign, readonly) PlayerModel playerModel; //全屏状态
 
 @property (nonatomic, weak) id<PlayerViewProtocol> delegate;
@@ -36,7 +38,7 @@ typedef NS_ENUM(NSInteger, PlayerModel)
 //播放已经完成
 - (void)playerDidPlayEnd:(PlayerView *)playerView;
 
-//即将切换屏幕显示模式（全屏/普通）
-- (void)playerWillSwitchModel:(PlayerModel)playerModel;
+//即将切换屏幕显示模式
+- (void)player:(PlayerView *)playerView willSwitchToModel:(PlayerModel)playerModel;
 
 @end

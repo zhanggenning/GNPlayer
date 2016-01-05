@@ -40,7 +40,7 @@
                         <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </state>
                     <connections>
-                        <action selector="fullScreenBtnCliced:" destination="iN0-l3-epB" eventType="touchUpInside" id="iZY-uk-fb4"/>
+                        <action selector="fullScreenBtnClicked:" destination="iN0-l3-epB" eventType="touchUpInside" id="niD-1J-R37"/>
                     </connections>
                 </button>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="00:00" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="0E7-zY-jsI">

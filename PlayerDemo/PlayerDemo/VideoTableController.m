@@ -27,9 +27,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeFrames:) name:UIDeviceOrientationDidChangeNotification object:nil];
-    
+      
     [_videoTable registerNib:[UINib nibWithNibName:NSStringFromClass([VideoCell class]) bundle:nil] forCellReuseIdentifier:@"cell"];
 }
 
@@ -39,32 +37,14 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 }
 
 
-- (void)changeFrames:(NSNotification *)notification
-{
-    NSLog(@"change notification: %@", notification.userInfo);
-    
-    if ([[UIDevice currentDevice] orientation]==UIInterfaceOrientationPortrait
-        || [[UIDevice currentDevice] orientation]==UIInterfaceOrientationPortraitUpsideDown)
-    {
-        NSLog(@"portrait");
-//        self.view.frame=CGRectMake(0, 0, height, width);
-    }
-    else
-    {
-        NSLog(@"landscape");
-//        self.view.frame=CGRectMake(0, 0, width, height);
-    }
-    NSLog(@"view is %@",self);
-}
-
 - (BOOL)shouldAutorotate
 {
-    return NO;
+    return YES;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
-    return UIInterfaceOrientationMaskAll;
+    return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
 //创建playerView
@@ -84,6 +64,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     _playerView.autoPlay = YES;
     _playerView.delegate = self;
     [_videoTable addSubview:_playerView];
+    
 }
 
 //销毁playerview
@@ -162,20 +143,34 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     [self destoryPlayerView];
 }
 
-- (void)playerWillSwitchModel:(PlayerModel)playerModel
+- (void)player:(PlayerView *)playerView willSwitchToModel:(PlayerModel)playerModel
 {
     switch (playerModel)
     {
         case PlayerModelNormal:
         {
-            NSLog(@"正常模式");
+            NSLog(@"[Demo] 切换至普通状态");
+            
             self.navigationController.navigationBarHidden = NO;
+            
+            CGRect frameInTableView = [_playerView convertRect:_playerView.frame toView:_videoTable];
+            [_playerView removeFromSuperview];
+            _playerView.frame = frameInTableView;
+            [_videoTable addSubview:_playerView];
+            
             break;
         }
         case PlayerModelFullScreen:
         {
-            NSLog(@"全屏模式");
+            NSLog(@"[Demo] 切换至全屏状态");
+            
             self.navigationController.navigationBarHidden = YES;
+            
+            CGRect frameInSelfView = [_playerView convertRect:_playerView.frame toView:self.view];
+            [_playerView removeFromSuperview];
+            _playerView.frame = frameInSelfView;
+            [self.view addSubview:_playerView];
+            
             break;
         }
         default:
