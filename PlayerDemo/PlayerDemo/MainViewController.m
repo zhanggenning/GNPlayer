@@ -7,13 +7,17 @@
 //
 
 #import "MainViewController.h"
-#import "PlayerView.h"
-#import "PlayerSlider.h"
+#import "SignalVideoController.h"
+#import "VideoTableController.h"
 
-@interface MainViewController ()
+@interface MainViewController () <UITableViewDataSource, UITableViewDelegate>
+
 {
-    PlayerView *player;
+    NSArray *_names;
 }
+
+@property (weak, nonatomic) IBOutlet UITableView *mainTable;
+
 @end
 
 @implementation MainViewController
@@ -22,19 +26,52 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
-    player = [PlayerView playerView];
-    player.frame = CGRectMake(0, 0, 300, 200);
-    [self.view addSubview:player];
+    _names = @[@"单个视频", @"多个视频"];
+    
+    [_mainTable registerClass:[UITableViewCell class] forCellReuseIdentifier:@"cell"];
 }
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
-- (void)viewDidLayoutSubviews
+#pragma mark -- <UITableViewDataSource, UITableViewDelegate>
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    player.center = self.view.center;
+    return _names.count;
 }
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell" forIndexPath:indexPath];
+    cell.textLabel.textAlignment = NSTextAlignmentCenter;
+    cell.textLabel.text = _names[indexPath.row];
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    
+    if (indexPath.row == 0)
+    {
+        SignalVideoController *signalCtl = [[SignalVideoController alloc] init];
+        [self.navigationController pushViewController:signalCtl animated:YES];
+    }
+    else if (indexPath.row == 1)
+    {
+        VideoTableController *videoCtl = [[VideoTableController alloc] init];
+        [self.navigationController pushViewController:videoCtl animated:YES];
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 50;
+}
+
+
 
 @end

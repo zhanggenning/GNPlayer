@@ -8,8 +8,37 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol PlayerViewProtocol;
+
+typedef NS_ENUM(NSInteger, PlayerModel)
+{
+    PlayerModelNormal = 0, //普通模式
+    PlayerModelFullScreen, //全屏模式
+};
+
 @interface PlayerView : UIView
 
-+ (PlayerView *)playerView;
+@property (nonatomic, assign) BOOL autoPlay; //进入自动播放
+
+@property (nonatomic, assign) CGFloat controlBarAlpha; //控制栏透明度
+
+@property (nonatomic, assign, readonly) PlayerModel playerModel; //全屏状态
+
+@property (nonatomic, weak) id<PlayerViewProtocol> delegate;
+
++ (PlayerView *)playerViewWithUrl:(NSString *)url;
+
+@end
+
+
+@protocol PlayerViewProtocol <NSObject>
+
+@optional
+
+//播放已经完成
+- (void)playerDidPlayEnd:(PlayerView *)playerView;
+
+//即将切换屏幕显示模式
+- (void)player:(PlayerView *)playerView willSwitchToModel:(PlayerModel)playerModel;
 
 @end
