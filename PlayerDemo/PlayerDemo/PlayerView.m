@@ -27,17 +27,17 @@ typedef NS_ENUM(NSInteger, PlayerState)
     CGRect _selfFrame;
     CGRect _initFrame;
     BOOL _stopUpdateUI; //停止刷新UI
-    
-    NSTimer *_moniorTimer; //定时器
+
     CGFloat _controlBarShowTime;
+    dispatch_source_t _timer; //定时器
     
     CGFloat _currentTime; //当前播放时间(单位 s)
     CGFloat _bufferTime; //缓冲时间(单位 s)
     CGFloat _durationTime; //总时长.(单位 s)
 }
 
-@property (nonatomic, copy) NSString *videoUrl; //视频url
-@property (nonatomic, assign) PlayerState currentPlayerState; //播放器状态
+@property (nonatomic, assign) PlayerState playerState; //播放器状态
+@property (nonatomic, assign) PlayerModel playerModel; //全屏状态
 
 @property (strong, nonatomic) AVPlayer *avPlayer;
 @property (strong, nonatomic) AVPlayerItem *avPlayerItem;
@@ -57,32 +57,23 @@ typedef NS_ENUM(NSInteger, PlayerState)
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
     
-    [self deinitAVPlayer];
+    [self removeTimer];
+    
+    [self destoryAVPlayer];
     
     NSLog(@"播放器释放");
-}
-
-- (void)removeFromSuperview
-{
-    [super removeFromSuperview];
-    
-    //移除定时器
-    [self removeTimer];
 }
 
 - (void)willMoveToSuperview:(UIView *)newSuperview
 {
     if (newSuperview != NULL)
     {
-        //添加定时器
-        [self addTimer];
-        
         //添加到父视图，自动播放
         if (_autoPlay && _avPlayer)
         {
             [_avPlayer play];
             
-            [self swithPlayerState:PlayerIsStart];
+            self.playerState = PlayerIsStart;
         }
     }
 }
@@ -91,44 +82,45 @@ typedef NS_ENUM(NSInteger, PlayerState)
 {
     if (!CGRectEqualToRect(_selfFrame, self.frame))
     {
-        _indicatorView.center = CGPointMake(self.frame.size.width / 2, self.frame.size.height / 2);
-        _playerControlBar.frame = CGRectMake(0, self.frame.size.height - 35, self.frame.size.width, 35);
+        if (_playerControlBar)
+        {
+#warning 这里playerControlBar需要回归原位
+            [_playerControlBar showControlBarWithAnimation:NO];
+            
+            _playerControlBar.frame = CGRectMake(0, self.frame.size.height - 35, self.frame.size.width, 35);
+        }
         
         _selfFrame = self.frame;
         
-        if (!CGRectEqualToRect(_selfFrame, [UIScreen mainScreen].bounds))
+        if (!CGRectEqualToRect(self.frame, [UIScreen mainScreen].bounds))
         {
             _initFrame = _selfFrame;
         }
     }
 }
 
-
 #pragma mark -- Private API
-- (void)initAVPlayerWithUrl:(NSString *)url
+- (void)createAVPlayerWithUrl:(NSString *)url
 {
     NSURL *videoUrl = [NSURL URLWithString:url];
-    _avPlayerItem = [[AVPlayerItem alloc] initWithURL:videoUrl];
-    _avPlayer = [[AVPlayer alloc] initWithPlayerItem:_avPlayerItem];
+    AVPlayerItem *item = [[AVPlayerItem alloc] initWithURL:videoUrl];
+    _avPlayer = [[AVPlayer alloc] initWithPlayerItem:item];
     
     AVPlayerLayer *playLayer = (AVPlayerLayer *)self.layer;
     playLayer.videoGravity = AVLayerVideoGravityResizeAspect; //视频填充模式
     playLayer.player= _avPlayer;
  
-    //保存url
-    _videoUrl = url;
-    
-    //添加播放结束监听
+    //添加播放结束通知
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moviePlayDidEnd) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
 }
 
-- (void)deinitAVPlayer
+- (void)destoryAVPlayer
 {
-    //通知
+    //移除播放结束通知
     [[NSNotificationCenter defaultCenter] removeObserver:self name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
     
     //释放播放源
-    if (_avPlayer.currentItem)
+    if (_avPlayer && _avPlayer.currentItem)
     {
         [_avPlayer.currentItem cancelPendingSeeks];
         [_avPlayer.currentItem.asset cancelLoading];
@@ -141,19 +133,30 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 - (void)addTimer
 {
-    if (!_moniorTimer)
-    {
-        _moniorTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(playerMonitorService) userInfo:nil repeats:YES];
-    }
+    NSTimeInterval period = 1.0; //设置时间间隔
+    
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    _timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+    dispatch_source_set_timer(_timer, DISPATCH_TIME_NOW, period * NSEC_PER_SEC, 0 * NSEC_PER_SEC);
+    
+    __weak typeof(self) weakSelf = self;
+    dispatch_source_set_event_handler(_timer, ^{
+        
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        
+        [strongSelf playerMonitorService];
+    });
+    
+    dispatch_source_set_cancel_handler(_timer, ^{
+        NSLog(@"取消定时器");
+    });
+    dispatch_resume(_timer);
+
 }
 
 - (void)removeTimer
 {
-    if (_moniorTimer)
-    {
-        [_moniorTimer invalidate];
-        _moniorTimer = nil;
-    }
+    dispatch_source_cancel(_timer);
 }
 
 - (void)initUI
@@ -164,12 +167,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
     [self addSubview:_playerControlBar];
     
     //切换状态
-    [self swithPlayerState:PlayerIsStop];
+    self.playerState = PlayerIsStop;
     
-    //菊花
-    self.indicatorView.hidden = YES;
-    self.indicatorView.hidesWhenStopped = YES;
-
     //手势
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAction)];
     tap.delegate = self;
@@ -185,11 +184,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
 //更新UI
 - (void)updateUI
 {
-    if (_stopUpdateUI)
-    {
-        return;
-    }
-
     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -221,12 +215,16 @@ typedef NS_ENUM(NSInteger, PlayerState)
         
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
+        [_playerControlBar showControlBarWithAnimation:NO];
+        
         //更新当前播放时间标签
         strongSelf.playerControlBar.currentTime = 0.0;
         
         //更新播放进度
         strongSelf.playerControlBar.process = 0.0;
         
+        //更新缓冲进度
+        strongSelf.playerControlBar.bufferProcess = 0.0;
     });
 }
 
@@ -246,7 +244,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
 //监控播放器播放状态
 - (void)moniorPlayerState
 {
-    if (!_avPlayer.currentItem)
+    if (!_avPlayer || !_avPlayer.currentItem)
     {
         NSLog(@"AVPlayerItem 为空.");
         
@@ -263,92 +261,38 @@ typedef NS_ENUM(NSInteger, PlayerState)
         
         if (_bufferTime != _durationTime && _currentTime >= _bufferTime - 2)
         {
-            if (_currentPlayerState == PlayerIsStart)
+            if (_playerState == PlayerIsStart)
             {
                 [_avPlayer pause];
                 
-                [self swithPlayerState:PlayerIsBuffering];
+                self.playerState = PlayerIsBuffering;
             }
         }
         else
         {
-            if (_currentPlayerState == PlayerIsBuffering)
+            if (_playerState == PlayerIsBuffering)
             {
                 [_avPlayer play];
                 
-                [self swithPlayerState:PlayerIsStart];
+                self.playerState = PlayerIsStart;
             }
         }
         
         //更新UI
-        [self updateUI];
+        if (!_stopUpdateUI)
+        {
+            [self updateUI];
+        }
+        
     }
     else if (_avPlayer.currentItem.status == AVPlayerItemStatusFailed)
     {
-        [self swithPlayerState:PlayerIsFail];
+        self.playerState = PlayerIsFail;
     }
     else
     {
-        [self swithPlayerState:PlayerIsBuffering];
+        self.playerState = PlayerIsBuffering;
     }
-}
-
-//改变播放状态
-- (void)swithPlayerState:(PlayerState)state
-{
-    if (_currentPlayerState == state) {
-        return;
-    }
-    
-    switch (state)
-    {
-        case PlayerIsStop:
-        {
-            _stopUpdateUI = NO;
-            
-            _playerControlBar.playBtnState = kBtnStatePlay;
-            
-            [_indicatorView stopAnimating];
-            
-            NSLog(@"视频停止");
-            break;
-        }
-        case PlayerIsStart:
-        {
-            _stopUpdateUI = NO;
-            
-            _playerControlBar.playBtnState = kBtnStatePause;
-            
-            [_indicatorView stopAnimating];
-            
-            NSLog(@"视频播放中");
-            break;
-        }
-        case PlayerIsBuffering:
-        {
-            _stopUpdateUI = NO;
-            
-            _playerControlBar.playBtnState = kBtnStatePause;
-            
-            [_indicatorView startAnimating];
-            
-            NSLog(@"视频缓冲中");
-            break;
-        }
-        case PlayerIsFail:
-        {
-            _stopUpdateUI = YES;
-            
-            _playerControlBar.playBtnState = kBtnStatePlay;
-            
-            NSLog(@"视频播放失败");
-            break;
-        }
-        default:
-            break;
-    }
-    
-    _currentPlayerState = state;
 }
 
 //强制转屏幕
@@ -366,6 +310,46 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
+//缩放的实际操作
+- (void)scalePlayerWithPlayerModel:(PlayerModel)playerModel
+{
+    CGRect dstRect;
+    
+    //获取缩放目标尺寸
+    switch (playerModel)
+    {
+        case PlayerModelNormal:
+        {
+            dstRect = _initFrame;
+            break;
+        }
+        case PlayerModelFullScreen:
+        {
+            dstRect = [UIScreen mainScreen].bounds;
+            break;
+        }
+        default:
+            return;
+    }
+    
+    //回调出去，做外部处理
+    if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
+    {
+        [_delegate player:self willSwitchToModel:_playerModel];
+    }
+    
+    //移除控制栏
+    _playerControlBar.alpha = 0;
+ 
+    //缩放
+    [UIView animateWithDuration:0.3 animations:^{
+        self.frame = dstRect;
+    } completion:^(BOOL finished) {
+        _playerControlBar.alpha = 1;
+    }];
+    
+}
+
 #pragma mark -- Public API
 + (PlayerView *)playerViewWithUrl:(NSString *)url
 {
@@ -373,9 +357,11 @@ typedef NS_ENUM(NSInteger, PlayerState)
     
     player.autoresizingMask = UIViewAutoresizingNone;
     
+    player.videoUrl = url;
+    
     [player initUI];
     
-    [player initAVPlayerWithUrl:url];
+    [player addTimer];
 
     [[NSNotificationCenter defaultCenter] addObserver:player selector:@selector(orientationDidChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
     
@@ -386,54 +372,29 @@ typedef NS_ENUM(NSInteger, PlayerState)
 //屏幕旋转通知
 - (void)orientationDidChanged:(NSNotification *)note
 {
-#warning 注意：因为旋转过程中frame会变，为避免控制栏错乱，在旋转之前将其显示
-    [_playerControlBar showControlBarWithAnimation:NO];
-
     switch ([UIDevice currentDevice].orientation)
     {
         case UIDeviceOrientationPortrait:
         {
-            //隐藏控制栏
-            _playerControlBar.alpha = 0;
-            
-            //回调到外部做进一步处理
-            if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
+            if (self.playerModel != PlayerModelNormal)
             {
-                [_delegate player:self willSwitchToModel:PlayerModelNormal];
+                self.playerModel = PlayerModelNormal;
+                
+                [self scalePlayerWithPlayerModel:_playerModel];
             }
-            
-            //执行转屏
-            [UIView animateWithDuration:0.3 animations:^{
-                self.frame = _initFrame;
-            }completion:^(BOOL finished) {
-                _playerControlBar.alpha = 1;
-                _playerControlBar.scaleBtnState = kBtnStateNormal;
-                _playerModel = PlayerModelNormal;
-            }];
-            
+
             break;
         }
         case UIDeviceOrientationLandscapeLeft:
         case UIDeviceOrientationLandscapeRight:
         {
-            //隐藏控制栏
-            _playerControlBar.alpha = 0;
-            
-            //回调到外部做进一步处理
-            if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
+            if (self.playerModel != PlayerModelFullScreen)
             {
-                [_delegate player:self willSwitchToModel:PlayerModelFullScreen];
+                self.playerModel = PlayerModelFullScreen;
+                
+                [self scalePlayerWithPlayerModel:_playerModel];
             }
-            
-            //执行转屏
-            [UIView animateWithDuration:0.3 animations:^{
-                self.frame = [UIScreen mainScreen].bounds;
-            } completion:^(BOOL finished) {
-                _playerControlBar.alpha = 1;
-                _playerControlBar.scaleBtnState = kBtnStateFullScreen;
-                _playerModel = PlayerModelFullScreen;
-            }];
-            
+ 
             break;
         }
  
@@ -454,7 +415,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
         //重置UI
         [strongSelf resetUI];
         
-        [self swithPlayerState:PlayerIsStop];
+        self.playerState = PlayerIsStop;
         
         if (_delegate && [_delegate respondsToSelector:@selector(playerDidPlayEnd:)])
         {
@@ -486,6 +447,100 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
+
+#pragma mark -- Property
+- (void)setVideoUrl:(NSString *)videoUrl
+{
+    _videoUrl = videoUrl;
+    
+    if (_avPlayer)
+    {
+        [self destoryAVPlayer];
+    }
+
+    usleep(10 * 1000);
+    
+    [self createAVPlayerWithUrl:videoUrl];
+}
+
+
+//设置播放状态
+- (void)setPlayerState:(PlayerState)playerState
+{
+    if (_playerState == playerState)
+    {
+        return;
+    }
+    
+    //主线程
+    dispatch_async(dispatch_get_main_queue(), ^{
+        switch (playerState)
+        {
+            case PlayerIsStop:
+            {
+                _stopUpdateUI = NO;
+                _playerControlBar.playBtnState = kBtnStatePlay;
+                [_indicatorView stopAnimating];
+                
+                NSLog(@"视频停止");
+                break;
+            }
+            case PlayerIsStart:
+            {
+                _stopUpdateUI = NO;
+                _playerControlBar.playBtnState = kBtnStatePause;
+                [_indicatorView stopAnimating];
+                
+                NSLog(@"视频播放中");
+                break;
+            }
+            case PlayerIsBuffering:
+            {
+                _stopUpdateUI = NO;
+                _playerControlBar.playBtnState = kBtnStatePause;
+                [_indicatorView startAnimating];
+                
+                NSLog(@"视频缓冲中");
+                break;
+            }
+            case PlayerIsFail:
+            {
+                _stopUpdateUI = YES;
+                _playerControlBar.playBtnState = kBtnStatePlay;
+                NSLog(@"视频播放失败");
+                break;
+            }
+            default:
+                break;
+        }
+
+    });
+    
+    _playerState = playerState;
+}
+
+//设置播放模式
+- (void)setPlayerModel:(PlayerModel)playerModel
+{
+    _playerModel = playerModel;
+    
+    switch (playerModel)
+    {
+        case PlayerModelNormal:
+        {
+            _playerControlBar.scaleBtnState = kBtnStateNormal;
+            break;
+        }
+        case PlayerModelFullScreen:
+        {
+            _playerControlBar.scaleBtnState = kBtnStateFullScreen;
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 #pragma mark -- Tools
 
 - (NSTimeInterval)availableDurationWithLoadedTimeRanges:(NSArray *)loadedTimeRanges
@@ -500,36 +555,36 @@ typedef NS_ENUM(NSInteger, PlayerState)
 #pragma mark -- <PlayerControlProtocol>
 - (void)playerPlayBtnClicked
 {
-    switch (_currentPlayerState)
+    switch (_playerState)
     {
         case PlayerIsStop:
         {
             [_avPlayer play];
-            [self swithPlayerState:PlayerIsStart];
+            self.playerState = PlayerIsStart;
             break;
         }
         case PlayerIsStart:
         {
             [_avPlayer pause];
-            [self swithPlayerState:PlayerIsStop];
+            self.playerState = PlayerIsStop;
             break;
         }
         case PlayerIsBuffering:
         {
             [_avPlayer pause];
-            [self swithPlayerState:PlayerIsStop];
+            self.playerState = PlayerIsStop;
             break;
         }
         case PlayerIsFail:
         {
-            [self deinitAVPlayer];
+            [self destoryAVPlayer];
             
-            [self initAVPlayerWithUrl:_videoUrl];
+            [self createAVPlayerWithUrl:_videoUrl];
             
             [_avPlayer play];
             
-            [self swithPlayerState:PlayerIsStart];
-            
+            self.playerState = PlayerIsStart;
+  
             break;
         }
             
@@ -563,13 +618,13 @@ typedef NS_ENUM(NSInteger, PlayerState)
 //进度条值改变
 - (void)playerSloderValueChangeEnd:(CGFloat)value
 {
-    PlayerState ProPlayerState = _currentPlayerState;
+    PlayerState ProPlayerState = _playerState;
     
     //停止刷新UI
     _stopUpdateUI = YES;
     
     //暂停视频
-    if (_currentPlayerState == PlayerIsStart)
+    if (_playerState == PlayerIsStart)
     {
         [_avPlayer pause];
     }

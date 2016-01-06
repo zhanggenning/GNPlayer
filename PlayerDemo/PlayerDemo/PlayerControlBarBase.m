@@ -11,9 +11,6 @@
 #import "PlayerControlProtocol.h"
 
 @interface PlayerControlBarBase () <PlayerCustomSliderProtocol>
-{
-    CGRect _selfFrame;
-}
 
 @property (weak, nonatomic) IBOutlet UIButton *playBtn;
 @property (weak, nonatomic) IBOutlet UILabel *curTimeLab;
@@ -40,34 +37,6 @@
     
     _sliderView.delegate = self;
     self.backgroundColor = [UIColor colorWithWhite:0.7 alpha:0.5];
-}
-
-- (void)layoutSubviews
-{
-    CGFloat timeLabWidth = 40.0; //时间label长度
-    
-    if (!CGRectEqualToRect(_selfFrame, self.frame))
-    {
-        _selfFrame = self.frame;
-  
-        //播放按钮
-        _playBtn.frame = CGRectMake(8, 0, 30, 30);
-        _playBtn.center = CGPointMake(_playBtn.frame.size.width / 2, _selfFrame.size.height / 2);
-            
-        //当前播放时间
-        _curTimeLab.frame = CGRectMake(_playBtn.frame.origin.x + _playBtn.frame.size.width, 0, timeLabWidth, _selfFrame.size.height);
-            
-        //全屏按钮
-        _fullScreenBtn.frame = CGRectMake(_selfFrame.size.width - timeLabWidth - 8, 0, timeLabWidth, _selfFrame.size.height);
-            
-        //视频时长
-        _durationLab.frame = CGRectMake(_fullScreenBtn.frame.origin.x - timeLabWidth, 0, timeLabWidth, _selfFrame.size.height);
-            
-        //进度条
-        CGFloat sliderStartX = _curTimeLab.frame.origin.x + timeLabWidth + 10;
-        _sliderView.frame = CGRectMake(sliderStartX, 0, _durationLab.frame.origin.x - sliderStartX - 10, 20);
-        _sliderView.center = CGPointMake(_sliderView.center.x, _selfFrame.size.height / 2);
-    }
 }
 
 #pragma mark -- 私有API
@@ -212,7 +181,9 @@
     }
 }
 
+
 //隐藏控制栏
+//将控制栏进行了下移
 - (void)hiddenControlBarWithAnimation:(BOOL)animate
 {
     if (_isHidden == NO)
@@ -235,11 +206,11 @@
         
             _isHidden = YES;
         });
-    
     }
 }
 
 //显示控制栏
+//将控制栏上移
 - (void)showControlBarWithAnimation:(BOOL)animate
 {
     if (_isHidden == YES)

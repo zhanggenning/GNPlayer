@@ -27,7 +27,6 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    
     [self addBtton];
 }
 
@@ -123,6 +122,10 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
             
             self.navigationController.navigationBarHidden = NO;
             
+            [_player removeFromSuperview];
+            
+            [self.view addSubview:_player];
+            
             break;
         }
         case PlayerModelFullScreen:
@@ -130,6 +133,10 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
             NSLog(@"[Demo] 切换至全屏状态");
 
             self.navigationController.navigationBarHidden = YES;
+            
+            [_player removeFromSuperview];
+            
+            [self.view addSubview:_player];
             
             break;
         }

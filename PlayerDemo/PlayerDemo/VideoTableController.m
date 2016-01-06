@@ -36,7 +36,6 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     // Dispose of any resources that can be recreated.
 }
 
-
 - (BOOL)shouldAutorotate
 {
     return YES;
@@ -50,8 +49,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 //创建playerView
 - (void)createPlayerView:(NSIndexPath *)indexPath
 {
-    //先移除
-    [self destoryPlayerView];
+    [_playerView removeFromSuperview];
     
     //获取frame
     CGRect rectInTableView = [_videoTable rectForRowAtIndexPath:indexPath];
@@ -59,23 +57,19 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     CGRect playerFrame = [videoCell playerRectByCellFrame:rectInTableView];
     
     //创建
-    _playerView = [PlayerView playerViewWithUrl:kTestUrl2];
+    if (!_playerView)
+    {
+        _playerView = [PlayerView playerViewWithUrl:kTestUrl2];
+        _playerView.autoPlay = YES;
+        _playerView.delegate = self;
+    }
+    else
+    {
+        _playerView.videoUrl = kTestUrl2;
+    }
     _playerView.frame = playerFrame;
-    _playerView.autoPlay = YES;
-    _playerView.delegate = self;
     [_videoTable addSubview:_playerView];
     
-}
-
-//销毁playerview
-- (void)destoryPlayerView
-{
-    if (_playerView)
-    {
-        [_playerView removeFromSuperview];
-        
-        _playerView = nil;
-    }
 }
 
 
@@ -132,7 +126,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
         
         if (scrollView.contentOffset.y >= downLimit || scrollView.contentOffset.y <= upLimit)
         {
-            [self destoryPlayerView];
+            NSLog(@"悬浮");
         }
     }
 }
@@ -140,7 +134,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 #pragma mark -- <PlayerViewProtocol>
 - (void)playerDidPlayEnd:(PlayerView *)playerView
 {
-    [self destoryPlayerView];
+    [_playerView removeFromSuperview];
 }
 
 - (void)player:(PlayerView *)playerView willSwitchToModel:(PlayerModel)playerModel
