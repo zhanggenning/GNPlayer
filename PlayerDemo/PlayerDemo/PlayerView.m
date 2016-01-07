@@ -25,7 +25,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
 @interface PlayerView ()<PlayerControlProtocol, UIGestureRecognizerDelegate>
 {
     CGRect _selfFrame;
-    CGRect _initFrame;
     BOOL _stopUpdateUI; //停止刷新UI
 
     CGFloat _controlBarShowTime;
@@ -80,22 +79,19 @@ typedef NS_ENUM(NSInteger, PlayerState)
 
 - (void)layoutSubviews
 {
-    if (!CGRectEqualToRect(_selfFrame, self.frame))
+    if (!CGRectEqualToRect(_selfFrame, self.bounds))
     {
+        _indicatorView.center = CGPointMake(self.bounds.size.width / 2, self.bounds.size.height / 2);
+        
         if (_playerControlBar)
         {
 #warning 这里playerControlBar需要回归原位
             [_playerControlBar showControlBarWithAnimation:NO];
             
-            _playerControlBar.frame = CGRectMake(0, self.frame.size.height - 35, self.frame.size.width, 35);
+            _playerControlBar.frame = CGRectMake(0, self.bounds.size.height - 35, self.bounds.size.width, 35);
         }
         
-        _selfFrame = self.frame;
-        
-        if (!CGRectEqualToRect(self.frame, [UIScreen mainScreen].bounds))
-        {
-            _initFrame = _selfFrame;
-        }
+        _selfFrame = self.bounds;
     }
 }
 
@@ -259,7 +255,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
         
         _bufferTime = [self availableDurationWithLoadedTimeRanges:_avPlayer.currentItem.loadedTimeRanges]; //缓冲时间
         
-        if (_bufferTime != _durationTime && _currentTime >= _bufferTime - 2)
+        if ((NSInteger)_bufferTime != (NSInteger)_durationTime && _currentTime >= _bufferTime - 2)
         {
             if (_playerState == PlayerIsStart)
             {
@@ -310,46 +306,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
 }
 
-//缩放的实际操作
-- (void)scalePlayerWithPlayerModel:(PlayerModel)playerModel
-{
-    CGRect dstRect;
-    
-    //获取缩放目标尺寸
-    switch (playerModel)
-    {
-        case PlayerModelNormal:
-        {
-            dstRect = _initFrame;
-            break;
-        }
-        case PlayerModelFullScreen:
-        {
-            dstRect = [UIScreen mainScreen].bounds;
-            break;
-        }
-        default:
-            return;
-    }
-    
-    //回调出去，做外部处理
-    if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
-    {
-        [_delegate player:self willSwitchToModel:_playerModel];
-    }
-    
-    //移除控制栏
-    _playerControlBar.alpha = 0;
- 
-    //缩放
-    [UIView animateWithDuration:0.3 animations:^{
-        self.frame = dstRect;
-    } completion:^(BOOL finished) {
-        _playerControlBar.alpha = 1;
-    }];
-    
-}
-
 #pragma mark -- Public API
 + (PlayerView *)playerViewWithUrl:(NSString *)url
 {
@@ -379,8 +335,11 @@ typedef NS_ENUM(NSInteger, PlayerState)
             if (self.playerModel != PlayerModelNormal)
             {
                 self.playerModel = PlayerModelNormal;
-                
-                [self scalePlayerWithPlayerModel:_playerModel];
+ 
+                if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
+                {
+                    [_delegate player:self willSwitchToModel:_playerModel];
+                }
             }
 
             break;
@@ -391,8 +350,11 @@ typedef NS_ENUM(NSInteger, PlayerState)
             if (self.playerModel != PlayerModelFullScreen)
             {
                 self.playerModel = PlayerModelFullScreen;
-                
-                [self scalePlayerWithPlayerModel:_playerModel];
+            
+                if (_delegate && [_delegate respondsToSelector:@selector(player:willSwitchToModel:)])
+                {
+                    [_delegate player:self willSwitchToModel:_playerModel];
+                }
             }
  
             break;

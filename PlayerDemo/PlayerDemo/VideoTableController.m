@@ -14,10 +14,8 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 
 @interface VideoTableController () <UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate, PlayerViewProtocol>
 
-{
-    PlayerView *_playerView;
-}
-
+@property (nonatomic, strong) PlayerView *playerView;
+@property (nonatomic, strong) NSIndexPath *selectIndexPath;
 @property (weak, nonatomic) IBOutlet UITableView *videoTable;
 
 @end
@@ -38,7 +36,7 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
 
 - (BOOL)shouldAutorotate
 {
-    return YES;
+    return NO;
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
@@ -46,16 +44,20 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
-//创建playerView
-- (void)createPlayerView:(NSIndexPath *)indexPath
+- (CGRect)getPlayerFrameWithIndexPath:(NSIndexPath *)indexPath
 {
-    [_playerView removeFromSuperview];
-    
-    //获取frame
     CGRect rectInTableView = [_videoTable rectForRowAtIndexPath:indexPath];
     VideoCell *videoCell = [_videoTable cellForRowAtIndexPath:indexPath];
     CGRect playerFrame = [videoCell playerRectByCellFrame:rectInTableView];
     
+    return playerFrame;
+}
+
+//创建playerView
+- (void)createPlayerView:(NSIndexPath *)indexPath
+{
+    [_playerView removeFromSuperview];
+
     //创建
     if (!_playerView)
     {
@@ -67,9 +69,10 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     {
         _playerView.videoUrl = kTestUrl2;
     }
-    _playerView.frame = playerFrame;
-    [_videoTable addSubview:_playerView];
     
+    _playerView.frame = [self getPlayerFrameWithIndexPath:indexPath];
+    
+    [_videoTable addSubview:_playerView];
 }
 
 
@@ -96,7 +99,8 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
         [strongSelf createPlayerView:indexPath];
-
+        
+        strongSelf.selectIndexPath = indexPath;
     };
     
     return cell;
@@ -117,20 +121,6 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
     return 8;
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-    if (_playerView)
-    {
-        CGFloat downLimit = _playerView.frame.origin.y + _playerView.frame.size.height - 64;
-        CGFloat upLimit = _playerView.frame.origin.y - [UIScreen mainScreen].bounds.size.height;
-        
-        if (scrollView.contentOffset.y >= downLimit || scrollView.contentOffset.y <= upLimit)
-        {
-            NSLog(@"悬浮");
-        }
-    }
-}
-
 #pragma mark -- <PlayerViewProtocol>
 - (void)playerDidPlayEnd:(PlayerView *)playerView
 {
@@ -147,10 +137,17 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
             
             self.navigationController.navigationBarHidden = NO;
             
-            CGRect frameInTableView = [_playerView convertRect:_playerView.frame toView:_videoTable];
+            CGRect frameInTableView = [_playerView convertRect:_playerView.bounds toView:_videoTable];
+            
             [_playerView removeFromSuperview];
             _playerView.frame = frameInTableView;
             [_videoTable addSubview:_playerView];
+            
+            CGRect playerFrame = [self getPlayerFrameWithIndexPath:_selectIndexPath];
+            [UIView animateWithDuration:0.3 animations:^{
+                _playerView.transform = CGAffineTransformIdentity;
+                _playerView.frame = playerFrame;
+            }];
             
             break;
         }
@@ -160,10 +157,32 @@ static NSString * const kTestUrl2 = @"http://us.sinaimg.cn/0024T6n8jx06Y803DaoU0
             
             self.navigationController.navigationBarHidden = YES;
             
-            CGRect frameInSelfView = [_playerView convertRect:_playerView.frame toView:self.view];
+            CGRect frameInSelfView = [_playerView convertRect:_playerView.bounds toView:self.view];
             [_playerView removeFromSuperview];
             _playerView.frame = frameInSelfView;
             [self.view addSubview:_playerView];
+            
+            switch ([UIDevice currentDevice].orientation)
+            {
+                case UIDeviceOrientationLandscapeLeft:
+                {
+                    [UIView animateWithDuration:0.3 animations:^{
+                        _playerView.transform = CGAffineTransformMakeRotation(M_PI_2);
+                        _playerView.frame = [UIScreen mainScreen].bounds;
+                    }];
+                    break;
+                }
+                case UIDeviceOrientationLandscapeRight:
+                {
+                    [UIView animateWithDuration:0.3 animations:^{
+                        _playerView.transform = CGAffineTransformMakeRotation(-M_PI_2);
+                        _playerView.frame = [UIScreen mainScreen].bounds;
+                    }];
+                    break;
+                }
+                default:
+                    break;
+            }
             
             break;
         }
