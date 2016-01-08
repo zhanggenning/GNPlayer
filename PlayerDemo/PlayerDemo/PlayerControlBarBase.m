@@ -10,6 +10,8 @@
 #import "PlayerCustomSlider.h"
 #import "PlayerControlProtocol.h"
 
+static NSString * const kHiddenControlBar = @"controlBarHidden";
+
 @interface PlayerControlBarBase () <PlayerCustomSliderProtocol>
 
 @property (weak, nonatomic) IBOutlet UIButton *playBtn;
@@ -22,6 +24,11 @@
 
 @implementation PlayerControlBarBase
 
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:kHiddenControlBar object:nil];
+}
+
 - (void)defaultUI
 {
     self.playBtnState = kBtnStatePlay;
@@ -30,9 +37,6 @@
     self.process = 0.0;
     self.bufferProcess = 0.0;
     self.scaleBtnState = kBtnStateNormal;
-    
-    _isHidden = NO;
-    
     self.clipsToBounds = YES;
     
     _sliderView.delegate = self;
@@ -81,28 +85,18 @@
     }
 }
 
+static
 
-#pragma mark -- 代理 <PlayerCustomSliderProtocol>
-- (void)slider:(PlayerCustomSlider *)slider valueChangedEnd:(CGFloat) value
+//SIGALRM信号捕捉
+void signal_handler(int signo)
 {
-    if (_delegate && [_delegate respondsToSelector:@selector(playerSloderValueChangeEnd:)])
+    if (signo == SIGALRM)
     {
-        [_delegate playerSloderValueChangeEnd:value];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kHiddenControlBar object:nil];
     }
 }
 
-#pragma mark -- 公共API
-+ (PlayerControlBarBase *)playerControlBar
-{
-    PlayerControlBarBase *controlBar = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([PlayerControlBarBase class]) owner:nil options:nil] lastObject];
-    
-    controlBar.autoresizingMask = UIViewAutoresizingNone;
-    
-    [controlBar defaultUI];
-    
-    return controlBar;
-}
-
+#pragma mark -- 属性
 //播放状态
 - (void)setPlayBtnState:(PlayBtnState)playBtnState
 {
@@ -181,55 +175,93 @@
     }
 }
 
-
-//隐藏控制栏
-//将控制栏进行了下移
-- (void)hiddenControlBarWithAnimation:(BOOL)animate
+- (CGRect)getBarFrameWithHidden:(BOOL)hiddenControlBar
 {
-    if (_isHidden == NO)
-    {
-        CGRect rect = self.frame;
-        rect.origin.y = self.frame.origin.y + self.frame.size.height;
+    CGRect rect = self.frame;
     
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            if (animate)
-            {
-                [UIView animateWithDuration:0.3 animations:^{
-                self.frame = rect;
-                }];
-            }
-            else
-            {
-                self.frame = rect;
-            }
+    if (hiddenControlBar == YES)
+    {
+        rect.origin.y = self.frame.origin.y + self.frame.size.height;
+    }
+    else
+    {
+        rect.origin.y = self.frame.origin.y - self.frame.size.height;
+    }
+    
+    return rect;
+}
+
+
+#pragma mark -- 公共API
++ (PlayerControlBarBase *)playerControlBar
+{
+    PlayerControlBarBase *controlBar = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([PlayerControlBarBase class]) owner:nil options:nil] lastObject];
+    
+    controlBar.autoresizingMask = UIViewAutoresizingNone;
+    
+    [controlBar defaultUI];
+    
+    signal(SIGALRM, signal_handler);
+    
+    [[NSNotificationCenter defaultCenter] addObserver:controlBar selector:@selector(hiddenBarWithAnimation) name:kHiddenControlBar object:nil];
+    
+    return controlBar;
+}
+
+
+- (void)hiddenBarWithAnimation
+{
+    if (_isHiddenBar == NO)
+    {
+        _isHiddenBar = YES;
         
-            _isHidden = YES;
-        });
+        CGRect frame = [self getBarFrameWithHidden:_isHiddenBar];
+        
+        __weak typeof(self) weakSelf = self;
+        
+        [UIView animateWithDuration:0.3 animations:^{
+            
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            
+            strongSelf.frame = frame;
+            
+            _isHiddenBar = YES;
+        }];
     }
 }
 
-//显示控制栏
-//将控制栏上移
-- (void)showControlBarWithAnimation:(BOOL)animate
+- (void)showBarWithAnimation
 {
-    if (_isHidden == YES)
+    if (_isHiddenBar == YES)
     {
-        CGRect rect = self.frame;
-        rect.origin.y = self.frame.origin.y - self.frame.size.height;
+        _isHiddenBar = NO;
         
-        if (animate)
-        {
-            [UIView animateWithDuration:0.3 animations:^{
-                self.frame = rect;
-            }];
-        }
-        else
-        {
-            self.frame = rect;
-        }
+        CGRect frame = [self getBarFrameWithHidden:_isHiddenBar];
         
-        _isHidden = NO;
+        __weak typeof(self) weakSelf = self;
+            
+        [UIView animateWithDuration:0.3 animations:^{
+                
+            __strong typeof(weakSelf) strongSelf = self;
+                
+            strongSelf.frame = frame;
+
+        } completion:^(BOOL finished) {
+                alarm(5);
+        }];
+    }
+    else
+    {
+        alarm(5);
+    }
+}
+
+#pragma mark -- 代理 <PlayerCustomSliderProtocol>
+- (void)slider:(PlayerCustomSlider *)slider valueChangedEnd:(CGFloat) value
+{
+    if (_delegate && [_delegate respondsToSelector:@selector(playerSloderValueChangeEnd:)])
+    {
+        [_delegate playerSloderValueChangeEnd:value];
     }
 }
 

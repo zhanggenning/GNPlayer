@@ -37,15 +37,14 @@ typedef NS_ENUM(NSInteger, ScaleBtnState)
 
 @property (nonatomic, assign) ScaleBtnState scaleBtnState; //缩放状态（全屏/普通）
 
-@property (nonatomic, assign, readonly) BOOL isHidden;
-
-
 @property (nonatomic, weak) id<PlayerControlProtocol>delegate;
+
+@property (nonatomic, assign, readonly) BOOL isHiddenBar;
 
 + (PlayerControlBarBase *)playerControlBar;
 
-- (void)hiddenControlBarWithAnimation:(BOOL)animate;
+- (void)showBarWithAnimation;
 
-- (void)showControlBarWithAnimation:(BOOL)animate;
+- (void)hiddenBarWithAnimation;
 
 @end

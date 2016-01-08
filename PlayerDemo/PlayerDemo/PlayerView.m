@@ -86,8 +86,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
         if (_playerControlBar)
         {
 #warning 这里playerControlBar需要回归原位
-            [_playerControlBar showControlBarWithAnimation:NO];
-            
+            [_playerControlBar showBarWithAnimation];
+  
             _playerControlBar.frame = CGRectMake(0, self.bounds.size.height - 35, self.bounds.size.width, 35);
         }
         
@@ -159,6 +159,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
 {
     //添加控制栏
     _playerControlBar = [PlayerControlBarBase playerControlBar];
+    [_playerControlBar showBarWithAnimation];
+
     _playerControlBar.delegate = self;
     [self addSubview:_playerControlBar];
     
@@ -211,8 +213,8 @@ typedef NS_ENUM(NSInteger, PlayerState)
         
         __strong typeof(weakSelf) strongSelf = weakSelf;
         
-        [_playerControlBar showControlBarWithAnimation:NO];
-        
+        [_playerControlBar showBarWithAnimation];
+  
         //更新当前播放时间标签
         strongSelf.playerControlBar.currentTime = 0.0;
         
@@ -222,19 +224,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
         //更新缓冲进度
         strongSelf.playerControlBar.bufferProcess = 0.0;
     });
-}
-
-//监控UI
-- (void)moniorUI
-{
-    //控制条
-    if (_playerControlBar.isHidden == NO)
-    {
-        if (--_controlBarShowTime == 0)
-        {
-            [_playerControlBar hiddenControlBarWithAnimation:YES];
-        }
-    }
 }
 
 //监控播放器播放状态
@@ -389,9 +378,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
 //监控服务
 - (void)playerMonitorService
 {
-    //监控控制条
-    [self moniorUI];
-    
     //监控播放状态
     [self moniorPlayerState];
 }
@@ -399,13 +385,13 @@ typedef NS_ENUM(NSInteger, PlayerState)
 //单击隐藏控制栏
 - (void)tapAction
 {
-    if (_playerControlBar.isHidden == NO)
+    if (_playerControlBar.isHiddenBar)
     {
-        [_playerControlBar hiddenControlBarWithAnimation:YES];
+        [_playerControlBar showBarWithAnimation];
     }
     else
     {
-        [_playerControlBar showControlBarWithAnimation:YES];
+        [_playerControlBar showBarWithAnimation];
     }
 }
 
