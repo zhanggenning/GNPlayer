@@ -27,7 +27,6 @@ typedef NS_ENUM(NSInteger, PlayerState)
     CGRect _selfFrame;
     BOOL _stopUpdateUI; //停止刷新UI
 
-    CGFloat _controlBarShowTime;
     dispatch_source_t _timer; //定时器
     
     CGFloat _currentTime; //当前播放时间(单位 s)
@@ -174,9 +173,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     
     //关闭UI更新
     _stopUpdateUI = YES;
-    
-    //显示控制栏时间
-    _controlBarShowTime = kPlayerControlBarShowTime;
+
 }
 
 //更新UI
@@ -391,7 +388,7 @@ typedef NS_ENUM(NSInteger, PlayerState)
     }
     else
     {
-        [_playerControlBar showBarWithAnimation];
+        [_playerControlBar hiddenBarWithAnimation];
     }
 }
 
@@ -595,15 +592,13 @@ typedef NS_ENUM(NSInteger, PlayerState)
 #pragma mark -- <UIGestureRecognizerDelegate>
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-    //点击事件发生，重置控制栏显示时间
-    _controlBarShowTime = kPlayerControlBarShowTime;
-    
     if ([touch.view isKindOfClass:[self class]])
     {
         return YES;
     }
     else
     {
+        [_playerControlBar showBarWithAnimation];
         return NO;
     }
 }
