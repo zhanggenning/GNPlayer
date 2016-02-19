@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9531" systemVersion="14F1509" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="HeaderView">
+            <rect key="frame" x="0.0" y="0.0" width="537" height="166"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="大年初一的三大强片前期宣传都做的七七八八了，《美人鱼》昨天刚发了终极预告，今天《三打》也来了。相对于美人鱼预告的不如意，三打这个预告片可是做的噱头十足，猛虎巨龙蝙蝠野猪众妖集结，白骨精逆天变身。" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XHC-zv-1Rl">
+                    <rect key="frame" x="16" y="67" width="513" height="47"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                    <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="测试视频两行主标题，测试视频两行主标题，测试视频两行主标题" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u9a-ff-NMP">
+                    <rect key="frame" x="16" y="4" width="462" height="41"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rq8-1O-1ID">
+                    <rect key="frame" x="484" y="8" width="45" height="45"/>
+                    <color key="backgroundColor" red="0.37000729830000001" green="0.95686274510000002" blue="0.28190183390000001" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="45" id="Lvu-dp-nym"/>
+                        <constraint firstAttribute="height" constant="45" id="ss3-rj-ye4"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                    <state key="normal" title="扩展"/>
+                    <connections>
+                        <action selector="packUpBtn:" destination="iN0-l3-epB" eventType="touchUpInside" id="74d-6F-BIy"/>
+                    </connections>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="999999次播放" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5DB-ei-nlM">
+                    <rect key="frame" x="16" y="49" width="76" height="14"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                    <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9MN-Ny-p1w">
+                    <rect key="frame" x="16" y="67" width="150" height="30"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Ci-sq-s6P">
+                            <rect key="frame" x="0.0" y="0.0" width="65" height="30"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                            <state key="normal" title="👍 712"/>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="urC-AC-UVC">
+                            <rect key="frame" x="85" y="0.0" width="65" height="30"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                            <state key="normal" title="👎 278"/>
+                        </button>
+                    </subviews>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="30" id="3e2-E1-3eO"/>
+                        <constraint firstAttribute="bottom" secondItem="4Ci-sq-s6P" secondAttribute="bottom" id="4nd-ML-Oau"/>
+                        <constraint firstAttribute="bottom" secondItem="urC-AC-UVC" secondAttribute="bottom" id="GT8-tZ-Dd2"/>
+                        <constraint firstItem="urC-AC-UVC" firstAttribute="leading" secondItem="4Ci-sq-s6P" secondAttribute="trailing" constant="20" id="H31-aP-7a2"/>
+                        <constraint firstAttribute="trailing" secondItem="urC-AC-UVC" secondAttribute="trailing" id="Hea-8I-2Kf"/>
+                        <constraint firstItem="4Ci-sq-s6P" firstAttribute="top" secondItem="9MN-Ny-p1w" secondAttribute="top" id="J4x-C5-yIZ"/>
+                        <constraint firstAttribute="width" constant="150" id="NqK-I8-kLl"/>
+                        <constraint firstItem="urC-AC-UVC" firstAttribute="width" secondItem="4Ci-sq-s6P" secondAttribute="width" id="b5R-JZ-zw6"/>
+                        <constraint firstItem="urC-AC-UVC" firstAttribute="top" secondItem="9MN-Ny-p1w" secondAttribute="top" id="cRq-Kx-Iao"/>
+                        <constraint firstItem="4Ci-sq-s6P" firstAttribute="leading" secondItem="9MN-Ny-p1w" secondAttribute="leading" id="mLJ-6Y-pE9"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+            <constraints>
+                <constraint firstItem="5DB-ei-nlM" firstAttribute="leading" secondItem="u9a-ff-NMP" secondAttribute="leading" id="8z8-VS-3Rc"/>
+                <constraint firstItem="9MN-Ny-p1w" firstAttribute="top" secondItem="5DB-ei-nlM" secondAttribute="bottom" constant="4" id="Alk-EQ-NZK"/>
+                <constraint firstItem="u9a-ff-NMP" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="4" id="Fel-HA-DIc"/>
+                <constraint firstAttribute="trailing" secondItem="rq8-1O-1ID" secondAttribute="trailing" constant="8" id="Px2-dv-ckc"/>
+                <constraint firstItem="9MN-Ny-p1w" firstAttribute="leading" secondItem="5DB-ei-nlM" secondAttribute="leading" id="RWa-Ir-kFC"/>
+                <constraint firstAttribute="trailing" secondItem="XHC-zv-1Rl" secondAttribute="trailing" constant="8" id="Vx0-sW-uMm"/>
+                <constraint firstItem="rq8-1O-1ID" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="8" id="YnV-vj-nCz"/>
+                <constraint firstItem="XHC-zv-1Rl" firstAttribute="top" secondItem="5DB-ei-nlM" secondAttribute="bottom" constant="4" id="eLY-tz-gbt"/>
+                <constraint firstItem="u9a-ff-NMP" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="16" id="f5I-NM-NqN"/>
+                <constraint firstItem="XHC-zv-1Rl" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="16" id="w91-3i-ntA"/>
+                <constraint firstItem="5DB-ei-nlM" firstAttribute="top" secondItem="u9a-ff-NMP" secondAttribute="bottom" constant="4" id="xGj-wO-oaq"/>
+                <constraint firstItem="rq8-1O-1ID" firstAttribute="leading" secondItem="u9a-ff-NMP" secondAttribute="trailing" constant="6" id="zYK-RE-fcU"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="Containt_expendBtnTail" destination="Px2-dv-ckc" id="zFX-PN-jLK"/>
+                <outlet property="Containt_zanViewHeight" destination="3e2-E1-3eO" id="Fro-m0-ue3"/>
+                <outlet property="Containt_zanViewTop" destination="Alk-EQ-NZK" id="eRX-FI-CQS"/>
+                <outlet property="Contraint_expendBtnWidth" destination="Lvu-dp-nym" id="M64-7T-Ytz"/>
+                <outlet property="Contraint_mainTitleBottom" destination="xGj-wO-oaq" id="2VO-JR-609"/>
+                <outlet property="Contraint_mainTitleLeading" destination="f5I-NM-NqN" id="8pQ-Rn-1Fs"/>
+                <outlet property="Contraint_mainTitleTail" destination="zYK-RE-fcU" id="krC-yh-kkG"/>
+                <outlet property="Contraint_mainTitleTop" destination="Fel-HA-DIc" id="gq5-Bn-xXk"/>
+                <outlet property="detailText" destination="XHC-zv-1Rl" id="GjJ-qp-bWf"/>
+                <outlet property="mainTitleText" destination="u9a-ff-NMP" id="lMp-nl-CAe"/>
+                <outlet property="playNumberText" destination="5DB-ei-nlM" id="6Vf-po-Rm2"/>
+            </connections>
+            <point key="canvasLocation" x="511.5" y="219"/>
+        </view>
+    </objects>
+</document>
